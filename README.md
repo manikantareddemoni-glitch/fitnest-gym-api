@@ -18,10 +18,12 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 3. Providing clear, human-readable records combining members, lockers, and allotment statuses via a relational SQL JOIN query.
 4. Implementing audit-safe soft deletes with instant restore capabilities (Twist 1).
 5. Enforcing a strict, forward-only allotment lifecycle (`pending` $\rightarrow$ `approved` $\rightarrow$ `done`) to eliminate clerical errors (Twist 2).
+6. Providing role-based staff and admin authentication using JWT and bcrypt password hashing (Modules 4 & 5).
 
 ### Tech Stack
 - **Runtime & Framework:** Node.js (v18+) with Express.js (v4)
 - **Database:** SQLite3 via `better-sqlite3` (synchronous, fast, file-based SQL engine with enforced foreign key integrity)
+- **Security:** `jsonwebtoken` (JWT bearer tokens) & `bcryptjs` (password hashing)
 - **API Testing:** Postman Collection v2.1.0 & VS Code REST Client (`group1.http`)
 - **Version Control:** Git & GitHub with modular branching per group member
 
@@ -48,10 +50,10 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 | # | Member Name | Reg. No. | Part | Responsibility | Contribution (What was built) |
 |---|---|---|---|---|---|
 | 1 | **RAVELLA LOKESH** | 252U1R1217 | Part 1: Server and routes | Express setup, server.js, route registration, folder structure, error-handling middleware, status codes | Built Express server (`server.js`), mounted route modules (`routes/`), implemented centralized 404 and 500 error handlers, established HTTP status code standards across the API. |
-| 2 | **SHISHIRA RAVIKANTI** | 252U1R1218 | Part 2: Database | SQLite connection, 3 tables, foreign keys, deleted field, seed data, reusable query functions | Designed SQL schema with foreign keys and `deleted` column (`database/schema.sql`), connected SQLite using `better-sqlite3` (`db.js`), authored reusable database query objects, created seed script (`database/seed.js`) with 15 lockers (including Locker 12). |
+| 2 | **SHISHIRA RAVIKANTI** | 252U1R1218 | Part 2: Database | SQLite connection, tables, foreign keys, deleted field, seed data, reusable query functions | Designed SQL schema with foreign keys and `deleted` column (`database/schema.sql`), connected SQLite using `better-sqlite3` (`db.js`), authored reusable database query objects, created seed script (`database/seed.js`) with 15 lockers (including Locker 12). |
 | 3 | **CHATHWIK SRI SAI** | 252U1R1219 | Part 3: REST endpoints | Locker CRUD, member CRUD, allotment create, JOIN endpoint | Implemented full CRUD routes for Lockers (`routes/lockerRoutes.js`), Members (`routes/memberRoutes.js`), Allotment creation logic with double-allotment prevention, and the multi-table relational SQL JOIN endpoint (`/allotments/details`). |
 | 4 | **REDDEMONI MANIKANTA** | 252U1R1220 | Part 4: Validation, search and README | Input validation and messages, search by floor, README.md | Built validation middleware (`middleware/validate.js`) with standardized `{ "error": "..." }` responses, implemented query-parameter filtering for floor search (`GET /lockers?floor=2`), authored comprehensive project documentation (`README.md`). |
-| 5 | **ANILKUMAR REGELLA** | 252U1R1221 | Part 5: Twists and Postman | Soft delete and restore, status flow rule, Postman collection with all test scenarios | Developed Twist 1 soft-delete & restore logic, engineered Twist 2 forward-only status state machine (`pending` $\rightarrow$ `approved` $\rightarrow$ `done`), created export-ready Postman collection with test suites and verification runner. |
+| 5 | **ANILKUMAR REGELLA** | 252U1R1221 | Part 5: Twists, Auth and Postman | Soft delete and restore, status flow rule, JWT auth, Postman collection with test scenarios | Developed Twist 1 soft-delete & restore logic, engineered Twist 2 forward-only status state machine (`pending` $\rightarrow$ `approved` $\rightarrow$ `done`), created JWT authentication & RBAC routes, and exported Postman collection with test suites. |
 
 ---
 
@@ -61,10 +63,11 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 fitnest-gym-api/
 │
 ├── database/                                  # Database schema and seed script
-│   ├── schema.sql                             # SQL DDL for members, lockers, allotments
-│   └── seed.js                                # Seed script with 15 lockers (incl. Locker 12)
+│   ├── schema.sql                             # SQL DDL for members, lockers, allotments, users
+│   └── seed.js                                # Seed script with 15 lockers, members, allotments, users
 │
 ├── routes/                                    # Modular route handlers
+│   ├── authRoutes.js                          # User Registration, Login, JWT Issuance
 │   ├── lockerRoutes.js                        # Locker CRUD, floor filter, soft delete & restore
 │   ├── memberRoutes.js                        # Gym Member CRUD
 │   └── allotmentRoutes.js                     # Allotment assign, JOIN query, status flow
@@ -75,8 +78,30 @@ fitnest-gym-api/
 ├── postman/                                   # API testing suite
 │   └── FitNest_Gym.postman_collection.json    # Complete Postman test collection
 │
+├── screenshots/                               # API response visual evidence
+│   ├── 01_root_health_check.png
+│   ├── 02_get_all_lockers.png
+│   ├── 03_filter_lockers_floor.png
+│   ├── 04_create_locker.png
+│   ├── 05_twist1_soft_delete_12.png
+│   ├── 06_twist1_get_deleted_12.png
+│   ├── 07_twist1_restore_12.png
+│   ├── 08_twist1_get_restored_12.png
+│   ├── 09_get_all_members.png
+│   ├── 10_create_member.png
+│   ├── 11_create_allotment_pending.png
+│   ├── 12_prevent_double_allotment.png
+│   ├── 13_join_allotments_details.png
+│   ├── 14_twist2_pending_to_approved.png
+│   ├── 15_twist2_approved_to_pending_rejected.png
+│   ├── 16_auth_register.png
+│   ├── 17_auth_login_jwt.png
+│   ├── 18_rbac_protected_profile.png
+│   ├── 19_rbac_admin_forbidden.png
+│   └── 20_automated_verification_tests.png
+│
 ├── test/                                      # Automated testing
-│   └── verify.js                              # 22-point assertion suite (npm test)
+│   └── verify.js                              # 29-point assertion suite (npm test)
 │
 ├── .gitignore                                 # Git ignore patterns
 ├── db.js                                      # SQLite connection & query helpers
@@ -112,12 +137,26 @@ fitnest-gym-api/
    - `status`: TEXT DEFAULT 'pending' (`pending` \| `approved` \| `done`)
    - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
 
+4. **`users`**
+   - `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+   - `username`: TEXT UNIQUE NOT NULL
+   - `password`: TEXT NOT NULL (hashed with bcrypt)
+   - `role`: TEXT DEFAULT 'staff' (`admin` \| `staff`)
+   - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
+
 ### Entity-Relationship Diagram (Mermaid)
 
 ```mermaid
 erDiagram
     MEMBERS ||--o{ ALLOTMENTS : "has"
     LOCKERS ||--o{ ALLOTMENTS : "assigned to"
+    USERS {
+        INTEGER id PK
+        TEXT username
+        TEXT password
+        TEXT role
+        DATETIME created_at
+    }
 
     MEMBERS {
         INTEGER id PK
@@ -163,7 +202,7 @@ npm install
 ```
 
 ### Step 3: Seed Sample Data
-Seeds 5 gym members, 15 lockers (including Locker 12 on Floor 2), and sample allotments:
+Seeds 5 gym members, 15 lockers (including Locker 12 on Floor 2), sample allotments, and default users (admin & staff):
 ```bash
 npm run seed
 ```
@@ -175,7 +214,7 @@ npm start
 *The server will start listening at `http://localhost:3000`.*
 
 ### Step 5: (Optional) Run Automated Verification Suite
-Runs the built-in 22-point assertion suite to verify all endpoints, twists, and validations:
+Runs the built-in 29-point assertion suite covering all 5 syllabus modules:
 ```bash
 npm test
 ```
@@ -186,6 +225,10 @@ npm test
 
 | HTTP Method | URL Path | Description | Success Code | Error Codes |
 |---|---|---|---|---|
+| **Authentication** | | | | |
+| `POST` | `/auth/register` | Register new user with hashed password | `201 Created` | `400` (validation), `500` |
+| `POST` | `/auth/login` | Authenticate user & receive JWT token | `200 OK` | `400`, `401` (invalid credentials), `500` |
+| `GET` | `/auth/users` | List all registered users | `200 OK` | `500` |
 | **Lockers** | | | | |
 | `GET` | `/lockers` | Get all active lockers (excludes soft-deleted) | `200 OK` | `500` |
 | `GET` | `/lockers?floor=2` | Filter active lockers by floor number | `200 OK` | `400` (invalid floor), `500` |
@@ -201,10 +244,13 @@ npm test
 | `PUT` | `/members/:id` | Update member details | `200 OK` | `400`, `404`, `500` |
 | `DELETE` | `/members/:id` | Delete member by ID | `200 OK` | `404`, `500` |
 | **Allotments** | | | | |
-| `POST` | `/allotments` | Assign locker to member (starts in `pending`) | `201 Created` | `400` (missing fields / double allotment), `404` (member/locker missing), `500` |
+| `POST` | `/allotments` | Assign locker to member (starts in `pending`) | `201 Created` | `400` (missing fields / double allotment), `404`, `500` |
 | `GET` | `/allotments/details` | Multi-table JOIN returning allotment, member & locker names | `200 OK` | `500` |
 | `GET` | `/allotments` | Get all raw allotment records | `200 OK` | `500` |
 | `PATCH` | `/allotments/:id/status` | Advance allotment status forward by one step | `200 OK` | `400` ("Invalid status change"), `404`, `500` |
+| **Protected (RBAC)** | | | | |
+| `GET` | `/api/profile` | Protected user profile (requires Bearer JWT) | `200 OK` | `401` (missing), `403` (invalid) |
+| `GET` | `/api/admin/system-status` | Admin-only dashboard (RBAC: requires `admin` role) | `200 OK` | `401`, `403` (forbidden) |
 
 ---
 
@@ -239,7 +285,7 @@ npm test
 1. Open **Postman Desktop**.
 2. Click **Import** $\rightarrow$ select `postman/FitNest_Gym.postman_collection.json`.
 3. Open the **Twist Tests** folder and click **Run folder**.
-4. All 22 test assertions will run and pass with green checkmarks.
+4. All test assertions will run and pass with green checkmarks.
 
 ### Using VS Code REST Client:
 1. Install the **REST Client** extension in VS Code.
@@ -266,6 +312,108 @@ npm test
 - **Question:** *Why did you implement validation as Express middleware instead of writing `if` checks directly inside your controllers?*
 - **Answer:** *"Placing input validation inside dedicated middleware functions adheres to DRY (Don't Repeat Yourself) principles and Separation of Concerns. Middleware acts as a gatekeeper: if the request body or query parameter is invalid, it immediately halts execution and returns a consistent HTTP `400` JSON error before touching the database."*
 
-### Member 5: ANILKUMAR REGELLA (Twists and Postman)
-- **Question:** *Why is soft-delete preferred over hard-delete for gym locker management?*
-- **Answer:** *"Hard-deleting with `DELETE FROM lockers WHERE id = 12` would break foreign key relationships or cascade-delete historic allotment records, destroying our audit trail. Soft-delete preserves the database record while setting `deleted = 1`. The API queries filter by `deleted = 0`, making the locker instantly disappear from active use while allowing seamless one-click restoration."*
+### Member 5: ANILKUMAR REGELLA (Twists, Auth and Postman)
+- **Question:** *How does JWT authentication and Role-Based Access Control work in this project?*
+- **Answer:** *"When a user logs in via `POST /auth/login`, we verify their password hash with bcrypt and generate a digitally signed JWT token containing their user ID and role (`admin` or `staff`). The `authenticateToken` middleware verifies the Bearer token in the `Authorization` header, while `authorizeRole('admin')` ensures only authorized administrators can reach protected endpoints like `/api/admin/system-status`."*
+
+---
+
+## 11. API Testing Screenshots
+
+### 11.1 Root API Health Check & Info
+**Endpoint:** `GET /` — Returns status 200 OK and syllabus modules mapping.  
+![Root API Health](screenshots/01_root_health_check.png)
+
+---
+
+### 11.2 Lockers Management & Twist 1 (Soft Delete & Restore)
+
+#### 1. Get All Active Lockers
+**Endpoint:** `GET /lockers` — Excludes soft-deleted lockers (`deleted = 0`).  
+![Get All Lockers](screenshots/02_get_all_lockers.png)
+
+#### 2. Search / Filter Lockers by Floor
+**Endpoint:** `GET /lockers?floor=2` — Returns only active lockers located on Floor 2.  
+![Filter Lockers by Floor](screenshots/03_filter_lockers_floor.png)
+
+#### 3. Create a New Locker
+**Endpoint:** `POST /lockers` — Validates non-empty name and integer floor $\ge 0$.  
+![Create Locker](screenshots/04_create_locker.png)
+
+#### 4. Twist 1 (Step 1): Soft-Delete Locker 12
+**Endpoint:** `DELETE /lockers/12` — Sets `deleted = 1` without destroying database row.  
+![Soft Delete Locker 12](screenshots/05_twist1_soft_delete_12.png)
+
+#### 5. Twist 1 (Step 2): Verify Locker 12 is Hidden
+**Endpoint:** `GET /lockers/12` — Returns 404 Not Found while soft-deleted.  
+![Verify Locker 12 Hidden](screenshots/06_twist1_get_deleted_12.png)
+
+#### 6. Twist 1 (Step 3): Restore Locker 12
+**Endpoint:** `POST /lockers/12/restore` — Sets `deleted = 0` to reactivate the locker.  
+![Restore Locker 12](screenshots/07_twist1_restore_12.png)
+
+#### 7. Twist 1 (Step 4): Verify Locker 12 Reappeared in Active Use
+**Endpoint:** `GET /lockers/12` — Returns 200 OK with restored locker details.  
+![Verify Locker 12 Restored](screenshots/08_twist1_get_restored_12.png)
+
+---
+
+### 11.3 Gym Members Management
+
+#### 1. Get All Gym Members
+**Endpoint:** `GET /members` — Returns all registered gym members.  
+![Get All Members](screenshots/09_get_all_members.png)
+
+#### 2. Register a New Gym Member
+**Endpoint:** `POST /members` — Validates non-empty member name.  
+![Create Member](screenshots/10_create_member.png)
+
+---
+
+### 11.4 Allotments, Double-Allotment Prevention & Twist 2 (Status Flow)
+
+#### 1. Create Allotment (Initial Status Starts as 'pending')
+**Endpoint:** `POST /allotments` — Starts strictly in `pending` state.  
+![Create Allotment](screenshots/11_create_allotment_pending.png)
+
+#### 2. Client Problem Fix: Prevent Duplicate Active Allotment
+**Endpoint:** `POST /allotments` — Rejects assigning an already occupied locker with HTTP 400.  
+![Prevent Double Allotment](screenshots/12_prevent_double_allotment.png)
+
+#### 3. Relational SQL JOIN Query: Allotment Details
+**Endpoint:** `GET /allotments/details` — Joins allotments, members, and lockers tables.  
+![Allotment JOIN Query](screenshots/13_join_allotments_details.png)
+
+#### 4. Twist 2 (Step 1): Valid Status Move (`pending` $\rightarrow$ `approved`)
+**Endpoint:** `PATCH /allotments/:id/status` — Single-step forward transition succeeds (200 OK).  
+![Status Pending to Approved](screenshots/14_twist2_pending_to_approved.png)
+
+#### 5. Twist 2 (Step 2): Backward Move Rejected (`approved` $\rightarrow$ `pending`)
+**Endpoint:** `PATCH /allotments/:id/status` — Reverses state rejected with HTTP 400 "Invalid status change".  
+![Status Backward Move Rejected](screenshots/15_twist2_approved_to_pending_rejected.png)
+
+---
+
+### 11.5 Authentication & Role-Based Access Control (Modules 4 & 5)
+
+#### 1. User Registration with bcrypt Password Hashing
+**Endpoint:** `POST /auth/register` — Hashes password with 10 salt rounds.  
+![User Registration](screenshots/16_auth_register.png)
+
+#### 2. User Login & JWT Token Generation
+**Endpoint:** `POST /auth/login` — Verifies password hash and issues Bearer JWT token.  
+![User Login JWT](screenshots/17_auth_login_jwt.png)
+
+#### 3. Protected Route Access via Bearer Token
+**Endpoint:** `GET /api/profile` — Validates JWT and retrieves authenticated user profile.  
+![Protected Profile](screenshots/18_rbac_protected_profile.png)
+
+#### 4. Role-Based Access Control (RBAC: Forbidden for Staff)
+**Endpoint:** `GET /api/admin/system-status` — Intercepts non-admin staff users with HTTP 403 Forbidden.  
+![Admin System Status Forbidden](screenshots/19_rbac_admin_forbidden.png)
+
+---
+
+### 11.6 Automated Verification Test Runner (29/29 Tests Passing)
+**Command:** `npm test` — Comprehensive 29-assertion test suite covering all endpoints, twists, and security modules.  
+![Automated Test Runner Output](screenshots/20_automated_verification_tests.png)
