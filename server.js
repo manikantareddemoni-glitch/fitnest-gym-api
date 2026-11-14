@@ -1,36 +1,11 @@
-// ==============================================================================
-// FITNEST GYM – LOCKER ROOM MANAGEMENT REST API
-// Course: Backend Development Fundamentals (Year II Term II)
-// Group ID: YG-CSE2E-G01 | Theme 1: Locker Rooms
-// Syllabus Architecture: Comprehensive Coverage of Modules 1 to 5
-// ==============================================================================
-
-// ==============================================================================
-// MODULE 1: NODE.JS AND EXPRESS.JS FUNDAMENTALS
-// - Development Environment Setup & NPM package imports
-// - Express framework initialization
-// - HTTP Server setup, port binding & HTTP request/response handling
-// ==============================================================================
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-// JWT secret key used for token signing and verification (Module 4)
 const JWT_SECRET = process.env.JWT_SECRET || "fitnest_gym_secret_jwt_key_2026";
 
-// ==============================================================================
-// MODULE 2: SQLITE AND RELATIONAL DATABASE OPERATIONS
-// - SQLite connection via better-sqlite3 with enforced foreign keys
-// - Relational schema initialization (members, lockers, allotments, users)
-// - Database query helpers with parameterized SQL queries preventing SQL injection
-// ==============================================================================
 const { db, initializeDatabase } = require("./db");
 
-// ==============================================================================
-// MODULE 3: RESTFUL API DEVELOPMENT AND MODULAR ROUTING
-// - Modular router architecture (routing files separated by resource domain)
-// - Resource endpoints adhering to standard HTTP methods (GET, POST, PUT, PATCH, DELETE)
-// ==============================================================================
 const lockerRoutes = require("./routes/lockerRoutes");
 const memberRoutes = require("./routes/memberRoutes");
 const allotmentRoutes = require("./routes/allotmentRoutes");
@@ -39,40 +14,20 @@ const authRoutes = require("./routes/authRoutes");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ==============================================================================
-// MODULE 5: MIDDLEWARE, AUTHORIZATION AND ERROR HANDLING (PART 1: BUILT-IN & CUSTOM)
-// - Built-in middleware: express.json() for JSON body parsing
-// - Custom logging middleware: tracks incoming HTTP requests, methods, URLs, latency
-// - Middleware execution flow: sequentially executes before passing to route handlers
-// ==============================================================================
-
-// Built-in middleware to parse incoming application/json request bodies
 app.use(express.json());
 
-// Custom Logging Middleware (Demonstrates middleware execution flow & latency tracking)
 app.use((req, res, next) => {
     const startTime = Date.now();
     res.on("finish", () => {
         const duration = Date.now() - startTime;
         console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} -> Status: ${res.statusCode} (${duration}ms)`);
     });
-    next(); // Pass control to the next middleware/route handler in the stack
+    next();
 });
 
-// ==============================================================================
-// MODULE 4 & 5: AUTHENTICATION, AUTHORIZATION & SECURITY ENFORCEMENT
-// - Authentication Strategy: Bearer JWT Token verification
-// - Role-Based Access Control (RBAC): restricts endpoints to 'admin' or 'staff'
-// - Protected routes: secured against unauthorized access (HTTP 401 & 403)
-// ==============================================================================
-
-/**
- * Authentication Middleware:
- * Extracts Bearer token from the 'Authorization' header and validates it using jsonwebtoken.
- */
 function authenticateToken(req, res, next) {
     const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1]; // Format: Bearer <token>
+    const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
         return res.status(401).json({ error: "Access denied: Missing authentication token" });
@@ -82,15 +37,11 @@ function authenticateToken(req, res, next) {
         if (err) {
             return res.status(403).json({ error: "Invalid or expired token" });
         }
-        req.user = userPayload; // Attach authenticated user payload to request object
+        req.user = userPayload;
         next();
     });
 }
 
-/**
- * Authorization Middleware (Role-Based Access Control - RBAC):
- * Ensures that the authenticated user possesses the required privilege level.
- */
 function authorizeRole(requiredRole) {
     return (req, res, next) => {
         if (!req.user || req.user.role !== requiredRole) {
@@ -100,19 +51,11 @@ function authorizeRole(requiredRole) {
     };
 }
 
-// ==============================================================================
-// REGISTER ROUTE MODULES (MODULE 1 & 3: MODULAR ROUTING & REST PRINCIPLES)
-// ==============================================================================
-app.use("/auth", authRoutes);              // Module 4: User Registration & Login
-app.use("/lockers", lockerRoutes);        // Module 3: Locker CRUD & Floor Query Search
-app.use("/members", memberRoutes);        // Module 3: Gym Member CRUD
-app.use("/allotments", allotmentRoutes);  // Module 2 & 3: Relational Allotments & Status Flow
+app.use("/auth", authRoutes);
+app.use("/lockers", lockerRoutes);
+app.use("/members", memberRoutes);
+app.use("/allotments", allotmentRoutes);
 
-// ==============================================================================
-// PROTECTED ROUTES (MODULE 4 & 5: DEMONSTRATING AUTHENTICATION & RBAC IN ACTION)
-// ==============================================================================
-
-// Protected Route 1: Any authenticated user (staff or admin) can view their profile
 app.get("/api/profile", authenticateToken, (req, res) => {
     res.status(200).json({
         message: "Protected user profile accessed successfully",
@@ -120,7 +63,6 @@ app.get("/api/profile", authenticateToken, (req, res) => {
     });
 });
 
-// Protected Route 2: Restricted strictly to 'admin' role via RBAC
 app.get("/api/admin/system-status", authenticateToken, authorizeRole("admin"), (req, res) => {
     res.status(200).json({
         message: "Admin system status accessed successfully",
@@ -131,9 +73,6 @@ app.get("/api/admin/system-status", authenticateToken, authorizeRole("admin"), (
     });
 });
 
-// ==============================================================================
-// ROOT API HEALTH & DOCUMENTATION ENDPOINT (MODULE 1: HTTP REQUEST & RESPONSE)
-// ==============================================================================
 app.get("/", (req, res) => {
     res.status(200).json({
         message: "Welcome to FitNest Gym Locker Room Management REST API",
@@ -181,22 +120,13 @@ app.get("/", (req, res) => {
     });
 });
 
-// ==============================================================================
-// MODULE 5: ERROR HANDLING & LOGGING (CENTRALIZED ERROR ARCHITECTURE)
-// - 404 Not Found Handler for unmatched routes
-// - Global 500 / 400 Error Handler capturing syntax errors and uncaught exceptions
-// ==============================================================================
-
-// 404 Route Not Found Handler
 app.use((req, res) => {
     res.status(404).json({ error: `Cannot ${req.method} ${req.originalUrl} - Route not found` });
 });
 
-// Global Error Handler Middleware (4 arguments identify it as Express error handler)
 app.use((err, req, res, next) => {
     console.error("⚠️ [Global Error Handler]:", err.message);
 
-    // Express JSON parsing error (e.g., malformed JSON payload in request body)
     if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
         return res.status(400).json({ error: "Malformed JSON payload" });
     }
@@ -206,9 +136,6 @@ app.use((err, req, res, next) => {
     res.status(status).json({ error: message });
 });
 
-// ==============================================================================
-// HTTP SERVER LISTENER (MODULE 1: HTTP SERVER SETUP)
-// ==============================================================================
 if (require.main === module) {
     app.listen(PORT, () => {
         console.log(`====================================================`);
