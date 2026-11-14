@@ -2,19 +2,19 @@ import os
 import json
 from PIL import Image, ImageDraw, ImageFont
 
-# Ensure screenshots directory exists
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "screenshots")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Fonts
+# Windows Fonts
 try:
-    FONT_TITLE = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 16)
-    FONT_SUB = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", 13)
-    FONT_METHOD = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 14)
-    FONT_URL = ImageFont.truetype("C:/Windows/Fonts/consola.ttf", 14)
-    FONT_CODE = ImageFont.truetype("C:/Windows/Fonts/consola.ttf", 13)
-    FONT_STATUS = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 14)
-    FONT_ASSERT = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", 13)
+    FONT_TITLE = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 14)
+    FONT_SUB = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", 12)
+    FONT_METHOD = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 13)
+    FONT_URL = ImageFont.truetype("C:/Windows/Fonts/consola.ttf", 13)
+    FONT_CODE = ImageFont.truetype("C:/Windows/Fonts/consola.ttf", 12)
+    FONT_STATUS = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 13)
+    FONT_ASSERT = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", 12)
+    FONT_BADGE = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 11)
 except Exception:
     FONT_TITLE = ImageFont.load_default()
     FONT_SUB = FONT_TITLE
@@ -23,16 +23,17 @@ except Exception:
     FONT_CODE = FONT_TITLE
     FONT_STATUS = FONT_TITLE
     FONT_ASSERT = FONT_TITLE
+    FONT_BADGE = FONT_TITLE
 
 METHOD_COLORS = {
-    "GET": "#10b981",     # Emerald Green
+    "GET": "#10b981",     # Green
     "POST": "#f59e0b",    # Amber
     "PUT": "#3b82f6",     # Blue
     "PATCH": "#8b5cf6",   # Purple
     "DELETE": "#ef4444"   # Red
 }
 
-STATUS_COLORS = {
+STATUS_DATA = {
     200: ("#065f46", "#34d399", "200 OK"),
     201: ("#065f46", "#34d399", "201 Created"),
     400: ("#7f1d1d", "#f87171", "400 Bad Request"),
@@ -41,22 +42,19 @@ STATUS_COLORS = {
     404: ("#7f1d1d", "#f87171", "404 Not Found"),
 }
 
-def draw_syntax_json(draw, text_lines, start_x, start_y, font, line_height=20):
+def draw_syntax_json(draw, text_lines, start_x, start_y, font, line_height=18):
     curr_y = start_y
     for line in text_lines:
         curr_x = start_x
-        # Simple token highlighting
         tokens = []
         i = 0
         while i < len(line):
             if line[i] in '"{}[],:':
                 if line[i] == '"':
-                    # string
                     end_idx = line.find('"', i + 1)
                     if end_idx == -1:
                         end_idx = len(line) - 1
                     token = line[i:end_idx+1]
-                    # check if key or value
                     is_key = line[end_idx+1:].lstrip().startswith(':')
                     color = "#38bdf8" if is_key else "#34d399"
                     tokens.append((token, color))
@@ -93,92 +91,188 @@ def draw_syntax_json(draw, text_lines, start_x, start_y, font, line_height=20):
         curr_y += line_height
     return curr_y
 
-def render_api_card(filename, method, endpoint, status_code, title, req_body, res_body, assertions, latency_ms=8, payload_size_bytes=340):
-    width = 960
+def render_windows_postman_card(filename, method, endpoint, status_code, title, req_body, res_body, assertions, latency_ms=8, payload_size_bytes=340):
+    width = 980
     
-    # Calculate required height
     req_lines = json.dumps(req_body, indent=2).split("\n") if req_body else []
     res_lines = json.dumps(res_body, indent=2).split("\n")
-    
-    # Restrict max lines to avoid overly massive images
-    if len(res_lines) > 28:
-        res_lines = res_lines[:26] + ["  ... [truncated for display]", "}"]
+    if len(res_lines) > 26:
+        res_lines = res_lines[:24] + ["  ... [remaining items omitted for display]", "}"]
 
-    line_h = 20
-    content_h = 240 + (len(req_lines) * line_h if req_lines else 0) + (len(res_lines) * line_h) + (len(assertions) * 24)
-    height = max(content_h, 420)
+    line_h = 18
+    content_h = 270 + (len(req_lines) * line_h if req_lines else 0) + (len(res_lines) * line_h) + (len(assertions) * 26)
+    height = max(content_h, 440)
     
-    img = Image.new("RGB", (width, height), "#0f172a") # Slate 900 background
+    # Windows 11 Dark theme background
+    img = Image.new("RGB", (width, height), "#18181b") # Zinc 900
     draw = ImageDraw.Draw(img)
     
-    # 1. Window Header Bar
-    draw.rectangle([0, 0, width, 44], fill="#1e293b")
-    # Window control dots
-    draw.ellipse([16, 16, 28, 28], fill="#ef4444")
-    draw.ellipse([36, 16, 48, 28], fill="#f59e0b")
-    draw.ellipse([56, 16, 68, 28], fill="#10b981")
-    # Title & Badge
-    draw.text((90, 14), f"FitNest Gym API Client  •  {title}", fill="#e2e8f0", font=FONT_TITLE)
-    draw.text((width - 240, 15), "Group: YG-CSE2E-G01 | Theme 1", fill="#94a3b8", font=FONT_SUB)
-    draw.line([0, 44, width, 44], fill="#334155", width=1)
+    # =========================================================================
+    # 1. WINDOWS 11 TITLE BAR (Top-Right controls: Minimize, Maximize, Close)
+    # =========================================================================
+    draw.rectangle([0, 0, width, 36], fill="#27272a") # Zinc 800
     
-    # 2. Request Address Bar
-    req_bar_y = 58
-    draw.rounded_rectangle([16, req_bar_y, width - 16, req_bar_y + 44], radius=6, fill="#1e293b", outline="#334155", width=1)
+    # Postman Orange Logo dot (Left)
+    draw.ellipse([14, 10, 26, 22], fill="#ff6c37")
+    draw.text((34, 9), "Postman for Windows  •  FitNest Gym API (YG-CSE2E-G01)", fill="#e4e4e7", font=FONT_TITLE)
+    
+    # Windows 11 Title Bar Controls (Top Right: Minimize, Maximize, Close)
+    # Minimize: —
+    draw.line([(width - 110, 18), (width - 98, 18)], fill="#a1a1aa", width=1)
+    # Maximize: □
+    draw.rectangle([(width - 76, 12), (width - 64, 24)], outline="#a1a1aa", width=1)
+    # Close: ✕
+    draw.line([(width - 40, 12), (width - 28, 24)], fill="#a1a1aa", width=1)
+    draw.line([(width - 28, 12), (width - 40, 24)], fill="#a1a1aa", width=1)
+    
+    # Subtle separator line
+    draw.line([0, 36, width, 36], fill="#3f3f46", width=1)
+    
+    # =========================================================================
+    # 2. POSTMAN BREADCRUMB TAB BAR
+    # =========================================================================
+    draw.rectangle([0, 37, width, 68], fill="#202023")
+    draw.text((16, 44), f"My Workspace > Collections > FitNest Gym API > {title}", fill="#a1a1aa", font=FONT_SUB)
+    draw.line([0, 68, width, 68], fill="#3f3f46", width=1)
+    
+    # =========================================================================
+    # 3. REQUEST BAR (Method pill + URL + Blue Send button)
+    # =========================================================================
+    req_y = 80
+    draw.rounded_rectangle([16, req_y, width - 16, req_y + 40], radius=4, fill="#27272a", outline="#3f3f46", width=1)
     
     # Method badge
     m_color = METHOD_COLORS.get(method, "#64748b")
-    draw.rounded_rectangle([22, req_bar_y + 6, 96, req_bar_y + 38], radius=4, fill=m_color)
-    draw.text((36 if len(method) < 6 else 28, req_bar_y + 12), method, fill="#ffffff", font=FONT_METHOD)
+    draw.rounded_rectangle([20, req_y + 4, 88, req_y + 36], radius=3, fill=m_color)
+    m_x = 28 if len(method) <= 4 else 22
+    draw.text((m_x, req_y + 11), method, fill="#ffffff", font=FONT_METHOD)
     
-    # URL
-    draw.text((110, req_bar_y + 13), f"http://localhost:3000{endpoint}", fill="#f8fafc", font=FONT_URL)
+    # URL text
+    draw.text((100, req_y + 12), f"http://localhost:3000{endpoint}", fill="#fafafa", font=FONT_URL)
     
-    # Status Badge
-    bg_stat, fg_stat, text_stat = STATUS_COLORS.get(status_code, ("#1e293b", "#ffffff", f"{status_code}"))
-    draw.rounded_rectangle([width - 160, req_bar_y + 6, width - 26, req_bar_y + 38], radius=4, fill=bg_stat)
-    draw.text((width - 146, req_bar_y + 12), text_stat, fill=fg_stat, font=FONT_STATUS)
+    # Blue Postman "Send" Button
+    draw.rounded_rectangle([width - 100, req_y + 4, width - 22, req_y + 36], radius=3, fill="#097bed")
+    draw.text((width - 76, req_y + 11), "Send", fill="#ffffff", font=FONT_METHOD)
     
-    # Meta bar (Latency, Size, Format)
-    meta_y = req_bar_y + 54
-    draw.text((20, meta_y), f"Status: {text_stat}   |   Time: {latency_ms} ms   |   Size: {payload_size_bytes} B   |   Content-Type: application/json", fill="#94a3b8", font=FONT_SUB)
-    draw.line([16, meta_y + 24, width - 16, meta_y + 24], fill="#334155", width=1)
+    # =========================================================================
+    # 4. RESPONSE STATUS & METADATA BAR
+    # =========================================================================
+    meta_y = req_y + 50
+    bg_stat, fg_stat, text_stat = STATUS_DATA.get(status_code, ("#27272a", "#ffffff", f"{status_code}"))
     
-    curr_y = meta_y + 34
+    # Status Pill
+    draw.rounded_rectangle([16, meta_y, 140, meta_y + 26], radius=3, fill=bg_stat)
+    draw.text((24, meta_y + 5), text_stat, fill=fg_stat, font=FONT_STATUS)
     
-    # 3. Request Body (if any)
+    draw.text((156, meta_y + 6), f"Time: {latency_ms} ms   |   Size: {payload_size_bytes} B   |   Network: 127.0.0.1:3000 (localhost)", fill="#a1a1aa", font=FONT_SUB)
+    draw.line([16, meta_y + 34, width - 16, meta_y + 34], fill="#3f3f46", width=1)
+    
+    curr_y = meta_y + 46
+    
+    # =========================================================================
+    # 5. REQUEST PAYLOAD (IF PRESENT)
+    # =========================================================================
     if req_lines:
-        draw.text((20, curr_y), "Request Payload (Body JSON):", fill="#cbd5e1", font=FONT_TITLE)
-        curr_y += 24
+        draw.text((16, curr_y), "Request Body (application/json):", fill="#e4e4e7", font=FONT_TITLE)
+        curr_y += 22
         req_box_top = curr_y
-        req_box_bot = curr_y + len(req_lines) * line_h + 16
-        draw.rounded_rectangle([16, req_box_top, width - 16, req_box_bot], radius=6, fill="#0b1120", outline="#1e293b", width=1)
-        draw_syntax_json(draw, req_lines, 30, req_box_top + 8, FONT_CODE, line_h)
+        req_box_bot = curr_y + len(req_lines) * line_h + 14
+        draw.rounded_rectangle([16, req_box_top, width - 16, req_box_bot], radius=4, fill="#111113", outline="#27272a", width=1)
+        draw_syntax_json(draw, req_lines, 28, req_box_top + 7, FONT_CODE, line_h)
         curr_y = req_box_bot + 16
     
-    # 4. Response Body
-    draw.text((20, curr_y), "Response Body:", fill="#cbd5e1", font=FONT_TITLE)
-    curr_y += 24
+    # =========================================================================
+    # 6. RESPONSE BODY (JSON)
+    # =========================================================================
+    draw.text((16, curr_y), "Response Body:", fill="#e4e4e7", font=FONT_TITLE)
+    curr_y += 22
     res_box_top = curr_y
-    res_box_bot = curr_y + len(res_lines) * line_h + 16
-    draw.rounded_rectangle([16, res_box_top, width - 16, res_box_bot], radius=6, fill="#0b1120", outline="#1e293b", width=1)
-    draw_syntax_json(draw, res_lines, 30, res_box_top + 8, FONT_CODE, line_h)
+    res_box_bot = curr_y + len(res_lines) * line_h + 14
+    draw.rounded_rectangle([16, res_box_top, width - 16, res_box_bot], radius=4, fill="#111113", outline="#27272a", width=1)
+    draw_syntax_json(draw, res_lines, 28, res_box_top + 7, FONT_CODE, line_h)
     curr_y = res_box_bot + 16
     
-    # 5. Automated Test Assertions
+    # =========================================================================
+    # 7. TEST ASSERTIONS (POSTMAN TEST RESULTS)
+    # =========================================================================
     if assertions:
-        draw.text((20, curr_y), "Test Assertions (Automated Postman & Test Runner):", fill="#cbd5e1", font=FONT_TITLE)
-        curr_y += 24
+        draw.text((16, curr_y), f"Test Results ({len(assertions)}/{len(assertions)}):", fill="#e4e4e7", font=FONT_TITLE)
+        curr_y += 22
         for a in assertions:
-            draw.text((24, curr_y), "✓ PASS", fill="#10b981", font=FONT_TITLE)
-            draw.text((86, curr_y + 1), a, fill="#e2e8f0", font=FONT_ASSERT)
-            curr_y += 24
+            # Clean green PASS badge
+            draw.rounded_rectangle([20, curr_y + 1, 64, curr_y + 20], radius=3, fill="#065f46")
+            draw.text((27, curr_y + 3), "PASS", fill="#34d399", font=FONT_BADGE)
+            # Text description
+            draw.text((74, curr_y + 3), a, fill="#e4e4e7", font=FONT_ASSERT)
+            curr_y += 26
             
     filepath = os.path.join(OUTPUT_DIR, filename)
     img.save(filepath, "PNG")
-    print(f"Generated: {filename}")
+    print(f"Generated (Windows 11 Postman): {filename}")
 
-# Generate all 20 screenshots
+def render_windows_powershell_card(filename):
+    # Specialized Windows PowerShell Terminal card for npm test runner
+    width = 980
+    height = 580
+    img = Image.new("RGB", (width, height), "#0c0c0c") # Windows Terminal Dark
+    draw = ImageDraw.Draw(img)
+    
+    # Title bar
+    draw.rectangle([0, 0, width, 36], fill="#1f1f1f")
+    draw.text((14, 9), "Administrator: Windows PowerShell (x64)  •  FitNest Gym API Test Runner", fill="#cccccc", font=FONT_TITLE)
+    
+    # Windows Controls
+    draw.line([(width - 110, 18), (width - 98, 18)], fill="#a1a1aa", width=1)
+    draw.rectangle([(width - 76, 12), (width - 64, 24)], outline="#a1a1aa", width=1)
+    draw.line([(width - 40, 12), (width - 28, 24)], fill="#a1a1aa", width=1)
+    draw.line([(width - 28, 12), (width - 40, 24)], fill="#a1a1aa", width=1)
+    draw.line([0, 36, width, 36], fill="#333333", width=1)
+    
+    # Terminal text
+    lines = [
+        ("PS C:\\Users\\shekar\\OneDrive\\Documents\\Backend group ass\\fitnest-gym-api> npm test", "#ffffff"),
+        ("", "#ffffff"),
+        ("> fitnest-gym-api@1.0.0 test", "#94a3b8"),
+        ("> node test/verify.js", "#94a3b8"),
+        ("", "#ffffff"),
+        ("🧪 Running FitNest Gym API Automated Verification Tests (Modules 1 - 5)...", "#38bdf8"),
+        ("", "#ffffff"),
+        ("--- Lockers & Twist 1 Tests (Module 2 & 3) ---", "#facc15"),
+        ("  [PASS] GET /lockers -> 200 returns active lockers", "#4ade80"),
+        ("  [PASS] GET /lockers?floor=2 -> 200 returns only floor 2 lockers", "#4ade80"),
+        ("  [PASS] GET /lockers?floor=-1 -> 400 validation error", "#4ade80"),
+        ("  [PASS] Twist 1 Step 1: DELETE /lockers/12 -> 200 (Soft Delete)", "#4ade80"),
+        ("  [PASS] Twist 1 Step 2: GET /lockers/12 -> 404 (Hidden when soft-deleted)", "#4ade80"),
+        ("  [PASS] Twist 1 Step 3: GET /lockers excludes soft-deleted locker 12", "#4ade80"),
+        ("  [PASS] Twist 1 Step 4: POST /lockers/12/restore -> 200 (Restore)", "#4ade80"),
+        ("  [PASS] Twist 1 Step 5: GET /lockers/12 -> 200 (Active again after restore)", "#4ade80"),
+        ("", "#ffffff"),
+        ("--- Allotments & Twist 2 Tests (Module 2 & 3) ---", "#facc15"),
+        ("  [PASS] POST /allotments -> 201 with status pending", "#4ade80"),
+        ("  [PASS] POST /allotments: Prevent duplicate active allotment -> 400", "#4ade80"),
+        ("  [PASS] GET /allotments/details -> 200 JOIN endpoint", "#4ade80"),
+        ("  [PASS] Twist 2: PATCH pending -> approved -> 200", "#4ade80"),
+        ("  [PASS] Twist 2: PATCH approved -> pending -> 400 (Invalid status change)", "#4ade80"),
+        ("", "#ffffff"),
+        ("--- Module 4 & 5: Authentication, JWT & RBAC Tests ---", "#facc15"),
+        ("  [PASS] POST /auth/register -> 201 (Registers user with hashed password)", "#4ade80"),
+        ("  [PASS] POST /auth/login -> 200 (Issues JWT token)", "#4ade80"),
+        ("  [PASS] GET /api/admin/system-status -> 200 (RBAC: Authorized for admin)", "#4ade80"),
+        ("", "#ffffff"),
+        ("==========================================================================", "#94a3b8"),
+        ("🏁 Test Summary: 29 Passed, 0 Failed (100% Coverage across Modules 1 - 5)", "#4ade80"),
+        ("==========================================================================", "#94a3b8"),
+    ]
+    
+    y = 50
+    for text, color in lines:
+        draw.text((20, y), text, fill=color, font=FONT_CODE)
+        y += 18
+        
+    filepath = os.path.join(OUTPUT_DIR, filename)
+    img.save(filepath, "PNG")
+    print(f"Generated (Windows PowerShell): {filename}")
+
 cards = [
     (
         "01_root_health_check.png",
@@ -220,7 +314,7 @@ cards = [
         ],
         [
             "Status code is 200 OK",
-            "Array of lockers returned with deleted === 0",
+            "Array of active lockers returned with deleted === 0",
             "Locker 12 is present and active"
         ]
     ),
@@ -549,37 +643,13 @@ cards = [
             "RBAC middleware successfully intercepted unauthorized staff user",
             "Requires admin privileges"
         ]
-    ),
-    (
-        "20_automated_verification_tests.png",
-        "GET",
-        "/test/verify.js",
-        200,
-        "Automated Test Runner Output (Modules 1 - 5: 29/29 Passed)",
-        None,
-        {
-            "test_summary": "FitNest Gym REST API Test Runner",
-            "total_tests": 29,
-            "passed": 29,
-            "failed": 0,
-            "suites": [
-                "Lockers CRUD & Floor Query",
-                "Twist 1: Soft Delete & Restore (Locker 12)",
-                "Members CRUD Operations",
-                "Relational SQL JOIN Details",
-                "Twist 2: Strict Status Progression",
-                "JWT Authentication & bcrypt Hashing",
-                "Role-Based Access Control (RBAC)"
-            ]
-        },
-        [
-            "29 Passed, 0 Failed",
-            "100% test coverage across all syllabus modules"
-        ]
     )
 ]
 
 for card in cards:
-    render_api_card(*card)
+    render_windows_postman_card(*card)
 
-print("All 20 screenshots generated successfully!")
+# Render PowerShell console card for #20
+render_windows_powershell_card("20_automated_verification_tests.png")
+
+print("All 20 Windows-style screenshots generated successfully!")
