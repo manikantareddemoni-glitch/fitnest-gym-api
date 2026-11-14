@@ -1,0 +1,99 @@
+### FitNest Gym - Locker Room Management REST API (Group ID: YG-CSE2E-G01)
+### Use with VS Code REST Client extension
+
+@baseUrl = http://localhost:3000
+
+### 1. Root Health Check
+GET {{baseUrl}}/
+
+### 2. Get All Active Lockers (Excludes Soft Deleted)
+GET {{baseUrl}}/lockers
+
+### 3. Search/Filter Lockers by Floor
+GET {{baseUrl}}/lockers?floor=2
+
+### 4. Get Locker by ID
+GET {{baseUrl}}/lockers/12
+
+### 5. Create a New Locker
+POST {{baseUrl}}/lockers
+Content-Type: application/json
+
+{
+  "name": "Locker 501",
+  "floor": 5
+}
+
+### 6. Update Locker
+PUT {{baseUrl}}/lockers/1
+Content-Type: application/json
+
+{
+  "name": "Locker 101 (Renovated)",
+  "floor": 1
+}
+
+### 7. Twist 1: Soft Delete Locker 12
+DELETE {{baseUrl}}/lockers/12
+
+### 8. Twist 1: Verify Locker 12 is Hidden (404)
+GET {{baseUrl}}/lockers/12
+
+### 9. Twist 1: Restore Locker 12
+POST {{baseUrl}}/lockers/12/restore
+
+### 10. Twist 1: Verify Locker 12 is Back (200)
+GET {{baseUrl}}/lockers/12
+
+### 11. Get All Members
+GET {{baseUrl}}/members
+
+### 12. Get Member by ID
+GET {{baseUrl}}/members/1
+
+### 13. Create Member
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+{
+  "name": "Arjun Das",
+  "phone": "9876543299",
+  "email": "arjun@fitnest.com"
+}
+
+### 14. Create Allotment (Starts as pending)
+POST {{baseUrl}}/allotments
+Content-Type: application/json
+
+{
+  "member_id": 4,
+  "locker_id": 12
+}
+
+### 15. Prevent Duplicate Active Allotment (Returns 400)
+POST {{baseUrl}}/allotments
+Content-Type: application/json
+
+{
+  "member_id": 5,
+  "locker_id": 12
+}
+
+### 16. Relational JOIN Query: Allotment Details
+GET {{baseUrl}}/allotments/details
+
+### 17. Twist 2: Status Flow pending -> approved (200)
+PATCH {{baseUrl}}/allotments/1/status
+Content-Type: application/json
+
+{
+  "status": "approved"
+}
+
+### 18. Twist 2: Backward status move rejected (400)
+PATCH {{baseUrl}}/allotments/1/status
+Content-Type: application/json
+
+{
+  "status": "pending"
+}

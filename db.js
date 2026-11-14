@@ -5,18 +5,27 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-// Path to the SQLite database file
-const dbPath = path.join(__dirname, 'fitnest.db');
+// Path to SQLite database file inside database/ directory
+const dbPath = path.join(__dirname, 'database', 'fitnest.db');
 const db = new Database(dbPath);
 
 // Crucial: SQLite has foreign keys turned OFF by default.
-// We must explicitly turn foreign keys ON to enforce relational integrity.
+// Explicitly turn foreign keys ON to enforce relational integrity.
 db.pragma('foreign_keys = ON');
 
-// Initialize schema if tables do not exist yet
-const schemaPath = path.join(__dirname, 'schema.sql');
-const schema = fs.readFileSync(schemaPath, 'utf-8');
-db.exec(schema);
+/**
+ * Initialize tables if they do not exist yet
+ */
+function initializeDatabase() {
+    const schemaPath = path.join(__dirname, 'database', 'schema.sql');
+    if (fs.existsSync(schemaPath)) {
+        const schema = fs.readFileSync(schemaPath, 'utf-8');
+        db.exec(schema);
+    }
+}
+
+// Auto-run schema initialization
+initializeDatabase();
 
 /**
  * Reusable Query Functions for Lockers
@@ -185,8 +194,8 @@ const allotmentQueries = {
 
 module.exports = {
     db,
+    initializeDatabase,
     lockerQueries,
     memberQueries,
     allotmentQueries
 };
-

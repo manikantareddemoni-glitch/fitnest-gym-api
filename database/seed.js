@@ -87,4 +87,3 @@ for (const a of allotmentsData) {
 }
 console.log(`✅ Seeded ${allotmentsData.length} allotments.`);
 console.log('🎉 Database seeding completed successfully!\n');
-

@@ -31,4 +31,3 @@ CREATE TABLE IF NOT EXISTS allotments (
     FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
     FOREIGN KEY (locker_id) REFERENCES lockers(id) ON DELETE CASCADE
 );
-

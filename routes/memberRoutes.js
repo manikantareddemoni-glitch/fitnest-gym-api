@@ -1,23 +1,19 @@
 // Owner: Member 3 - REST Endpoints (CHATHWIK SRI SAI, 252U1R1219)
-// Controller logic for Gym Member CRUD endpoints.
+// Member routes for basic CRUD operations
 
-const { memberQueries } = require('../db/database');
+const express = require('express');
+const router = express.Router();
+const { memberQueries } = require('../db');
+const { validateMember } = require('../middleware/validate');
 
-/**
- * GET /members
- * Retrieves all members.
- */
-function getAllMembers(req, res) {
+// GET /members (retrieves all gym members)
+router.get('/', (req, res) => {
     const members = memberQueries.getAll();
     res.status(200).json(members);
-}
+});
 
-/**
- * GET /members/:id
- * Retrieves a single member by ID.
- * Returns 404 if member does not exist.
- */
-function getMemberById(req, res) {
+// GET /members/:id (retrieves single member by ID)
+router.get('/:id', (req, res) => {
     const { id } = req.params;
     const member = memberQueries.getById(id);
 
@@ -26,14 +22,10 @@ function getMemberById(req, res) {
     }
 
     res.status(200).json(member);
-}
+});
 
-/**
- * POST /members
- * Adds a new gym member.
- * Returns 201 Created.
- */
-function createMember(req, res) {
+// POST /members (creates new gym member)
+router.post('/', validateMember, (req, res) => {
     const { name, phone, email } = req.body;
     const newMember = memberQueries.create(name, phone, email);
 
@@ -41,14 +33,10 @@ function createMember(req, res) {
         message: 'Member created successfully',
         member: newMember
     });
-}
+});
 
-/**
- * PUT /members/:id
- * Updates an existing member's name, phone, or email.
- * Returns 404 if member does not exist.
- */
-function updateMember(req, res) {
+// PUT /members/:id (updates member details)
+router.put('/:id', validateMember, (req, res) => {
     const { id } = req.params;
     const { name, phone, email } = req.body;
 
@@ -64,14 +52,10 @@ function updateMember(req, res) {
         message: 'Member updated successfully',
         member: updated
     });
-}
+});
 
-/**
- * DELETE /members/:id
- * Deletes a member from the database.
- * Returns 404 if member does not exist.
- */
-function deleteMember(req, res) {
+// DELETE /members/:id (deletes member)
+router.delete('/:id', (req, res) => {
     const { id } = req.params;
 
     const existing = memberQueries.getById(id);
@@ -84,13 +68,6 @@ function deleteMember(req, res) {
         message: 'Member deleted successfully',
         id: Number(id)
     });
-}
+});
 
-module.exports = {
-    getAllMembers,
-    getMemberById,
-    createMember,
-    updateMember,
-    deleteMember
-};
-
+module.exports = router;

@@ -22,7 +22,7 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 ### Tech Stack
 - **Runtime & Framework:** Node.js (v18+) with Express.js (v4)
 - **Database:** SQLite3 via `better-sqlite3` (synchronous, fast, file-based SQL engine with enforced foreign key integrity)
-- **API Testing:** Postman Collection v2.1.0 with automated test assertions
+- **API Testing:** Postman Collection v2.1.0 & VS Code REST Client (`group1.http`)
 - **Version Control:** Git & GitHub with modular branching per group member
 
 ---
@@ -47,15 +47,48 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 
 | # | Member Name | Reg. No. | Part | Responsibility | Contribution (What was built) |
 |---|---|---|---|---|---|
-| 1 | **RAVELLA LOKESH** | 252U1R1217 | Part 1: Server and routes | Express setup, app.js, route files, folder structure, error-handling middleware, status codes | Built Express server (`app.js`, `server.js`), configured routers (`routes/`), implemented centralized 404 and 500 error handlers (`errorHandler.js`), established HTTP status code standards across the API. |
-| 2 | **SHISHIRA RAVIKANTI** | 252U1R1218 | Part 2: Database | SQLite connection, 3 tables, foreign keys, deleted field, seed data, reusable query functions | Designed SQL schema with foreign keys and `deleted` column (`schema.sql`), connected SQLite using `better-sqlite3` (`database.js`), authored reusable database query objects, created seed script (`seed.js`) with 15 lockers (including Locker 12). |
-| 3 | **CHATHWIK SRI SAI** | 252U1R1219 | Part 3: REST endpoints | Locker CRUD, member CRUD, allotment create, JOIN endpoint | Implemented full CRUD controllers for Lockers (`lockersController.js`), Members (`membersController.js`), Allotment creation logic with double-allotment prevention, and the multi-table relational SQL JOIN endpoint (`/allotments/details`). |
-| 4 | **REDDEMONI MANIKANTA** | 252U1R1220 | Part 4: Validation, search and README | Input validation and messages, search by floor, README.md | Built validation middleware (`validate.js`) with standardized `{ "error": "..." }` responses, implemented query-parameter filtering for floor search (`GET /lockers?floor=2`), authored comprehensive project documentation (`README.md`). |
-| 5 | **ANILKUMAR REGELLA** | 252U1R1221 | Part 5: Twists and Postman | Soft delete and restore, status flow rule, Postman collection with all test scenarios | Developed Twist 1 soft-delete & restore controllers (`softDeleteLocker`, `restoreLocker`), engineered Twist 2 forward-only status state machine (`pending` $\rightarrow$ `approved` $\rightarrow$ `done`), created export-ready Postman collection with test suites. |
+| 1 | **RAVELLA LOKESH** | 252U1R1217 | Part 1: Server and routes | Express setup, server.js, route registration, folder structure, error-handling middleware, status codes | Built Express server (`server.js`), mounted route modules (`routes/`), implemented centralized 404 and 500 error handlers, established HTTP status code standards across the API. |
+| 2 | **SHISHIRA RAVIKANTI** | 252U1R1218 | Part 2: Database | SQLite connection, 3 tables, foreign keys, deleted field, seed data, reusable query functions | Designed SQL schema with foreign keys and `deleted` column (`database/schema.sql`), connected SQLite using `better-sqlite3` (`db.js`), authored reusable database query objects, created seed script (`database/seed.js`) with 15 lockers (including Locker 12). |
+| 3 | **CHATHWIK SRI SAI** | 252U1R1219 | Part 3: REST endpoints | Locker CRUD, member CRUD, allotment create, JOIN endpoint | Implemented full CRUD routes for Lockers (`routes/lockerRoutes.js`), Members (`routes/memberRoutes.js`), Allotment creation logic with double-allotment prevention, and the multi-table relational SQL JOIN endpoint (`/allotments/details`). |
+| 4 | **REDDEMONI MANIKANTA** | 252U1R1220 | Part 4: Validation, search and README | Input validation and messages, search by floor, README.md | Built validation middleware (`middleware/validate.js`) with standardized `{ "error": "..." }` responses, implemented query-parameter filtering for floor search (`GET /lockers?floor=2`), authored comprehensive project documentation (`README.md`). |
+| 5 | **ANILKUMAR REGELLA** | 252U1R1221 | Part 5: Twists and Postman | Soft delete and restore, status flow rule, Postman collection with all test scenarios | Developed Twist 1 soft-delete & restore logic, engineered Twist 2 forward-only status state machine (`pending` $\rightarrow$ `approved` $\rightarrow$ `done`), created export-ready Postman collection with test suites and verification runner. |
 
 ---
 
-## 4. Database Schema and ER Diagram
+## 4. Project Folder Structure
+
+```text
+fitnest-gym-api/
+│
+├── database/                                  # Database schema and seed script
+│   ├── schema.sql                             # SQL DDL for members, lockers, allotments
+│   └── seed.js                                # Seed script with 15 lockers (incl. Locker 12)
+│
+├── routes/                                    # Modular route handlers
+│   ├── lockerRoutes.js                        # Locker CRUD, floor filter, soft delete & restore
+│   ├── memberRoutes.js                        # Gym Member CRUD
+│   └── allotmentRoutes.js                     # Allotment assign, JOIN query, status flow
+│
+├── middleware/                                # Request validation middleware
+│   └── validate.js                            # Request body and query param validation
+│
+├── postman/                                   # API testing suite
+│   └── FitNest_Gym.postman_collection.json    # Complete Postman test collection
+│
+├── test/                                      # Automated testing
+│   └── verify.js                              # 22-point assertion suite (npm test)
+│
+├── .gitignore                                 # Git ignore patterns
+├── db.js                                      # SQLite connection & query helpers
+├── group1.http                                # VS Code REST Client test requests
+├── package.json                               # npm project manifest
+├── README.md                                  # Academic documentation
+└── server.js                                  # Main application entry point
+```
+
+---
+
+## 5. Database Schema and ER Diagram
 
 ### Database Tables Summary
 
@@ -112,7 +145,7 @@ erDiagram
 
 ---
 
-## 5. Setup and Run Instructions
+## 6. Setup and Run Instructions
 
 ### Prerequisites
 - Node.js (version 18 or above recommended)
@@ -120,6 +153,7 @@ erDiagram
 
 ### Step 1: Clone or Navigate to the Project
 ```bash
+git clone https://github.com/manikantareddemoni-glitch/fitnest-gym-api.git
 cd fitnest-gym-api
 ```
 
@@ -148,7 +182,7 @@ npm test
 
 ---
 
-## 6. API Endpoint Table
+## 7. API Endpoint Table
 
 | HTTP Method | URL Path | Description | Success Code | Error Codes |
 |---|---|---|---|---|
@@ -174,7 +208,7 @@ npm test
 
 ---
 
-## 7. Twist Explanations and Test Scenarios
+## 8. Twist Explanations and Test Scenarios
 
 ### Twist 1 – Soft Delete and Restore (Locker 12)
 - **Concept:** Rather than executing destructive SQL `DELETE FROM lockers`, we set `deleted = 1`. This preserves historical allotment records while hiding the locker from general availability. Restoring sets `deleted = 0`.
@@ -199,27 +233,26 @@ npm test
 
 ---
 
-## 8. Postman Usage Instructions
+## 9. Postman and REST Client Usage
 
-1. Open **Postman Desktop** or Postman Web.
-2. Click **Import** (top left).
-3. Select or drag-and-drop the file:  
-   `postman/FitNest_Gym.postman_collection.json`
-4. The collection **FitNest Gym - Locker Room Management REST API** will appear in your sidebar with 4 organized folders:
-   - `Lockers`
-   - `Members`
-   - `Allotments`
-   - `Twist Tests`
-5. Ensure your API server is running on `http://localhost:3000` (`npm start`).
-6. Click the folder **`Twist Tests`** and click **Run folder** to execute all tests automatically. All pre-configured `pm.test` assertions will pass with green checkmarks!
+### Using Postman:
+1. Open **Postman Desktop**.
+2. Click **Import** $\rightarrow$ select `postman/FitNest_Gym.postman_collection.json`.
+3. Open the **Twist Tests** folder and click **Run folder**.
+4. All 22 test assertions will run and pass with green checkmarks.
+
+### Using VS Code REST Client:
+1. Install the **REST Client** extension in VS Code.
+2. Open `group1.http`.
+3. Click **Send Request** above any endpoint to execute and inspect live responses directly inside your editor.
 
 ---
 
-## 9. Demo-Day Cheat Sheet (Viva Questions & Answers)
+## 10. Demo-Day Cheat Sheet (Viva Questions & Answers)
 
 ### Member 1: RAVELLA LOKESH (Server and Routes)
-- **Question:** *Why did you split the application into `app.js` and `server.js` instead of keeping everything in one file?*
-- **Answer:** *"Separating `app.js` from `server.js` decouples Express configuration and route mounting from the HTTP network listener (`app.listen`). This follows the Single Responsibility Principle and allows automated test frameworks like Supertest or built-in test runners to import `app` and test HTTP endpoints without binding to active system ports or causing port conflicts."*
+- **Question:** *How does `server.js` register routes, and how does error-handling middleware catch unhandled exceptions?*
+- **Answer:** *"In `server.js`, we use `app.use('/lockers', lockerRoutes)`, `app.use('/members', memberRoutes)`, and `app.use('/allotments', allotmentRoutes)`. Centralized error handling uses a 4-argument signature `(err, req, res, next)`. Whenever a JSON parsing error occurs or an exception is thrown, Express intercepts it and returns a clean HTTP JSON error response."*
 
 ### Member 2: SHISHIRA RAVIKANTI (Database)
 - **Question:** *Why did you have to run `PRAGMA foreign_keys = ON;` in SQLite, and what happens if you forget it?*
@@ -227,13 +260,12 @@ npm test
 
 ### Member 3: CHATHWIK SRI SAI (REST Endpoints)
 - **Question:** *How did you solve the client's problem where two members were given the same locker?*
-- **Answer:** *"In `createAllotment`, before inserting a new allotment record, we run a query `allotmentQueries.findActiveByLockerId(locker_id)` that checks if any allotment exists for that locker with status `pending` or `approved`. If found, the API rejects the request with HTTP `400` and the error `{ 'error': 'Locker is already actively allotted' }`. Only when the previous allotment is marked `done` is the locker released for reuse."*
+- **Answer:** *"In `allotmentRoutes.js`, before inserting a new allotment record, we run a query `allotmentQueries.findActiveByLockerId(locker_id)` that checks if any allotment exists for that locker with status `pending` or `approved`. If found, the API rejects the request with HTTP `400` and the error `{ 'error': 'Locker is already actively allotted' }`. Only when the previous allotment is marked `done` is the locker released for reuse."*
 
 ### Member 4: REDDEMONI MANIKANTA (Validation & Search)
 - **Question:** *Why did you implement validation as Express middleware instead of writing `if` checks directly inside your controllers?*
-- **Answer:** *"Placing input validation inside dedicated middleware functions adheres to DRY (Don't Repeat Yourself) principles and Separation of Concerns. Middleware acts as a gatekeeper: if the request body or query parameter is invalid, it immediately halts execution and returns a consistent HTTP `400` JSON error before touching the database or controller logic."*
+- **Answer:** *"Placing input validation inside dedicated middleware functions adheres to DRY (Don't Repeat Yourself) principles and Separation of Concerns. Middleware acts as a gatekeeper: if the request body or query parameter is invalid, it immediately halts execution and returns a consistent HTTP `400` JSON error before touching the database."*
 
 ### Member 5: ANILKUMAR REGELLA (Twists and Postman)
 - **Question:** *Why is soft-delete preferred over hard-delete for gym locker management?*
 - **Answer:** *"Hard-deleting with `DELETE FROM lockers WHERE id = 12` would break foreign key relationships or cascade-delete historic allotment records, destroying our audit trail. Soft-delete preserves the database record while setting `deleted = 1`. The API queries filter by `deleted = 0`, making the locker instantly disappear from active use while allowing seamless one-click restoration."*
-

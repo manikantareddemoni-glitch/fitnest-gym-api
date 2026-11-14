@@ -2,11 +2,11 @@
 // Tests all endpoints, validations, Twist 1 (Soft Delete & Restore), and Twist 2 (Status Flow)
 
 const http = require('http');
-const app = require('../src/app');
+const app = require('../server');
 
 // Re-seed DB first
 const { execSync } = require('child_process');
-execSync('node src/db/seed.js', { stdio: 'ignore' });
+execSync('node database/seed.js', { stdio: 'ignore' });
 
 const server = http.createServer(app);
 
@@ -263,4 +263,3 @@ server.listen(0, async () => {
         if (failed > 0) process.exit(1);
     }
 });
-
