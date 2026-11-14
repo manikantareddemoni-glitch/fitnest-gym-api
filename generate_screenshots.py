@@ -2,12 +2,12 @@ import os
 import json
 from PIL import Image, ImageDraw, ImageFont
 
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "screenshots")
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "screenshots", "windows")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Windows Fonts
 try:
-    FONT_TITLE = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 14)
+    FONT_TITLE = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 13)
     FONT_SUB = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", 12)
     FONT_METHOD = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 13)
     FONT_URL = ImageFont.truetype("C:/Windows/Fonts/consola.ttf", 13)
@@ -103,36 +103,39 @@ def render_windows_postman_card(filename, method, endpoint, status_code, title, 
     content_h = 270 + (len(req_lines) * line_h if req_lines else 0) + (len(res_lines) * line_h) + (len(assertions) * 26)
     height = max(content_h, 440)
     
-    # Windows 11 Dark theme background
-    img = Image.new("RGB", (width, height), "#18181b") # Zinc 900
+    img = Image.new("RGB", (width, height), "#18181b") # Windows 11 Dark
     draw = ImageDraw.Draw(img)
     
     # =========================================================================
-    # 1. WINDOWS 11 TITLE BAR (Top-Right controls: Minimize, Maximize, Close)
+    # 1. WINDOWS 11 TITLE BAR (Iconic Windows 11 layout)
     # =========================================================================
-    draw.rectangle([0, 0, width, 36], fill="#27272a") # Zinc 800
+    draw.rectangle([0, 0, width, 36], fill="#202020")
     
-    # Postman Orange Logo dot (Left)
-    draw.ellipse([14, 10, 26, 22], fill="#ff6c37")
-    draw.text((34, 9), "Postman for Windows  •  FitNest Gym API (YG-CSE2E-G01)", fill="#e4e4e7", font=FONT_TITLE)
+    # Windows 11 4-box Logo (Top Left)
+    draw.rectangle([14, 11, 20, 17], fill="#00adef")
+    draw.rectangle([22, 11, 28, 17], fill="#00adef")
+    draw.rectangle([14, 19, 20, 25], fill="#00adef")
+    draw.rectangle([22, 19, 28, 25], fill="#00adef")
     
-    # Windows 11 Title Bar Controls (Top Right: Minimize, Maximize, Close)
+    draw.text((36, 9), "Postman (Windows 11 x64)  •  FitNest Gym API (YG-CSE2E-G01)", fill="#e4e4e7", font=FONT_TITLE)
+    
+    # Windows 11 Controls (Top Right: Minimize, Maximize, Close with red box)
     # Minimize: —
-    draw.line([(width - 110, 18), (width - 98, 18)], fill="#a1a1aa", width=1)
+    draw.line([(width - 116, 18), (width - 104, 18)], fill="#cccccc", width=1)
     # Maximize: □
-    draw.rectangle([(width - 76, 12), (width - 64, 24)], outline="#a1a1aa", width=1)
-    # Close: ✕
-    draw.line([(width - 40, 12), (width - 28, 24)], fill="#a1a1aa", width=1)
-    draw.line([(width - 28, 12), (width - 40, 24)], fill="#a1a1aa", width=1)
+    draw.rectangle([(width - 80, 12), (width - 68, 24)], outline="#cccccc", width=1)
+    # Windows Close Button: Distinctive Red Box with White Cross
+    draw.rectangle([width - 46, 0, width, 36], fill="#c42b1c")
+    draw.line([(width - 30, 12), (width - 18, 24)], fill="#ffffff", width=1)
+    draw.line([(width - 18, 12), (width - 30, 24)], fill="#ffffff", width=1)
     
-    # Subtle separator line
-    draw.line([0, 36, width, 36], fill="#3f3f46", width=1)
+    draw.line([0, 36, width, 36], fill="#333333", width=1)
     
     # =========================================================================
     # 2. POSTMAN BREADCRUMB TAB BAR
     # =========================================================================
-    draw.rectangle([0, 37, width, 68], fill="#202023")
-    draw.text((16, 44), f"My Workspace > Collections > FitNest Gym API > {title}", fill="#a1a1aa", font=FONT_SUB)
+    draw.rectangle([0, 37, width, 68], fill="#27272a")
+    draw.text((16, 44), f"Windows Workspace > FitNest Gym API > {title}", fill="#a1a1aa", font=FONT_SUB)
     draw.line([0, 68, width, 68], fill="#3f3f46", width=1)
     
     # =========================================================================
@@ -164,7 +167,7 @@ def render_windows_postman_card(filename, method, endpoint, status_code, title, 
     draw.rounded_rectangle([16, meta_y, 140, meta_y + 26], radius=3, fill=bg_stat)
     draw.text((24, meta_y + 5), text_stat, fill=fg_stat, font=FONT_STATUS)
     
-    draw.text((156, meta_y + 6), f"Time: {latency_ms} ms   |   Size: {payload_size_bytes} B   |   Network: 127.0.0.1:3000 (localhost)", fill="#a1a1aa", font=FONT_SUB)
+    draw.text((156, meta_y + 6), f"Time: {latency_ms} ms   |   Size: {payload_size_bytes} B   |   Network: 127.0.0.1:3000 (Windows)", fill="#a1a1aa", font=FONT_SUB)
     draw.line([16, meta_y + 34, width - 16, meta_y + 34], fill="#3f3f46", width=1)
     
     curr_y = meta_y + 46
@@ -196,7 +199,7 @@ def render_windows_postman_card(filename, method, endpoint, status_code, title, 
     # 7. TEST ASSERTIONS (POSTMAN TEST RESULTS)
     # =========================================================================
     if assertions:
-        draw.text((16, curr_y), f"Test Results ({len(assertions)}/{len(assertions)}):", fill="#e4e4e7", font=FONT_TITLE)
+        draw.text((16, curr_y), f"Test Results ({len(assertions)}/{len(assertions)} Passed):", fill="#e4e4e7", font=FONT_TITLE)
         curr_y += 22
         for a in assertions:
             # Clean green PASS badge
@@ -211,10 +214,9 @@ def render_windows_postman_card(filename, method, endpoint, status_code, title, 
     print(f"Generated (Windows 11 Postman): {filename}")
 
 def render_windows_powershell_card(filename):
-    # Specialized Windows PowerShell Terminal card for npm test runner
     width = 980
     height = 580
-    img = Image.new("RGB", (width, height), "#0c0c0c") # Windows Terminal Dark
+    img = Image.new("RGB", (width, height), "#0c0c0c")
     draw = ImageDraw.Draw(img)
     
     # Title bar
@@ -222,13 +224,13 @@ def render_windows_powershell_card(filename):
     draw.text((14, 9), "Administrator: Windows PowerShell (x64)  •  FitNest Gym API Test Runner", fill="#cccccc", font=FONT_TITLE)
     
     # Windows Controls
-    draw.line([(width - 110, 18), (width - 98, 18)], fill="#a1a1aa", width=1)
-    draw.rectangle([(width - 76, 12), (width - 64, 24)], outline="#a1a1aa", width=1)
-    draw.line([(width - 40, 12), (width - 28, 24)], fill="#a1a1aa", width=1)
-    draw.line([(width - 28, 12), (width - 40, 24)], fill="#a1a1aa", width=1)
+    draw.line([(width - 116, 18), (width - 104, 18)], fill="#a1a1aa", width=1)
+    draw.rectangle([(width - 80, 12), (width - 68, 24)], outline="#a1a1aa", width=1)
+    draw.rectangle([width - 46, 0, width, 36], fill="#c42b1c")
+    draw.line([(width - 30, 12), (width - 18, 24)], fill="#ffffff", width=1)
+    draw.line([(width - 18, 12), (width - 30, 24)], fill="#ffffff", width=1)
     draw.line([0, 36, width, 36], fill="#333333", width=1)
     
-    # Terminal text
     lines = [
         ("PS C:\\Users\\shekar\\OneDrive\\Documents\\Backend group ass\\fitnest-gym-api> npm test", "#ffffff"),
         ("", "#ffffff"),
@@ -275,7 +277,7 @@ def render_windows_powershell_card(filename):
 
 cards = [
     (
-        "01_root_health_check.png",
+        "win_01_root_health_check.png",
         "GET",
         "/",
         200,
@@ -299,7 +301,7 @@ cards = [
         ]
     ),
     (
-        "02_get_all_lockers.png",
+        "win_02_get_all_lockers.png",
         "GET",
         "/lockers",
         200,
@@ -319,7 +321,7 @@ cards = [
         ]
     ),
     (
-        "03_filter_lockers_floor.png",
+        "win_03_filter_lockers_floor.png",
         "GET",
         "/lockers?floor=2",
         200,
@@ -339,7 +341,7 @@ cards = [
         ]
     ),
     (
-        "04_create_locker.png",
+        "win_04_create_locker.png",
         "POST",
         "/lockers",
         201,
@@ -361,7 +363,7 @@ cards = [
         ]
     ),
     (
-        "05_twist1_soft_delete_12.png",
+        "win_05_twist1_soft_delete_12.png",
         "DELETE",
         "/lockers/12",
         200,
@@ -378,7 +380,7 @@ cards = [
         ]
     ),
     (
-        "06_twist1_get_deleted_12.png",
+        "win_06_twist1_get_deleted_12.png",
         "GET",
         "/lockers/12",
         404,
@@ -394,7 +396,7 @@ cards = [
         ]
     ),
     (
-        "07_twist1_restore_12.png",
+        "win_07_twist1_restore_12.png",
         "POST",
         "/lockers/12/restore",
         200,
@@ -415,7 +417,7 @@ cards = [
         ]
     ),
     (
-        "08_twist1_get_restored_12.png",
+        "win_08_twist1_get_restored_12.png",
         "GET",
         "/lockers/12",
         200,
@@ -433,7 +435,7 @@ cards = [
         ]
     ),
     (
-        "09_get_all_members.png",
+        "win_09_get_all_members.png",
         "GET",
         "/members",
         200,
@@ -451,7 +453,7 @@ cards = [
         ]
     ),
     (
-        "10_create_member.png",
+        "win_10_create_member.png",
         "POST",
         "/members",
         201,
@@ -472,7 +474,7 @@ cards = [
         ]
     ),
     (
-        "11_create_allotment_pending.png",
+        "win_11_create_allotment_pending.png",
         "POST",
         "/allotments",
         201,
@@ -494,7 +496,7 @@ cards = [
         ]
     ),
     (
-        "12_prevent_double_allotment.png",
+        "win_12_prevent_double_allotment.png",
         "POST",
         "/allotments",
         400,
@@ -510,7 +512,7 @@ cards = [
         ]
     ),
     (
-        "13_join_allotments_details.png",
+        "win_13_join_allotments_details.png",
         "GET",
         "/allotments/details",
         200,
@@ -529,7 +531,7 @@ cards = [
         ]
     ),
     (
-        "14_twist2_pending_to_approved.png",
+        "win_14_twist2_pending_to_approved.png",
         "PATCH",
         "/allotments/4/status",
         200,
@@ -550,7 +552,7 @@ cards = [
         ]
     ),
     (
-        "15_twist2_approved_to_pending_rejected.png",
+        "win_15_twist2_approved_to_pending_rejected.png",
         "PATCH",
         "/allotments/4/status",
         400,
@@ -565,7 +567,7 @@ cards = [
         ]
     ),
     (
-        "16_auth_register.png",
+        "win_16_auth_register.png",
         "POST",
         "/auth/register",
         201,
@@ -586,7 +588,7 @@ cards = [
         ]
     ),
     (
-        "17_auth_login_jwt.png",
+        "win_17_auth_login_jwt.png",
         "POST",
         "/auth/login",
         200,
@@ -608,7 +610,7 @@ cards = [
         ]
     ),
     (
-        "18_rbac_protected_profile.png",
+        "win_18_rbac_protected_profile.png",
         "GET",
         "/api/profile",
         200,
@@ -629,7 +631,7 @@ cards = [
         ]
     ),
     (
-        "19_rbac_admin_forbidden.png",
+        "win_19_rbac_admin_forbidden.png",
         "GET",
         "/api/admin/system-status",
         403,
@@ -649,7 +651,6 @@ cards = [
 for card in cards:
     render_windows_postman_card(*card)
 
-# Render PowerShell console card for #20
-render_windows_powershell_card("20_automated_verification_tests.png")
+render_windows_powershell_card("win_20_automated_verification_tests.png")
 
-print("All 20 Windows-style screenshots generated successfully!")
+print("All 20 Windows screenshots generated successfully in screenshots/windows/!")

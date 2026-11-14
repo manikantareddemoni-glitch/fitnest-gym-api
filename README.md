@@ -78,27 +78,28 @@ fitnest-gym-api/
 ├── postman/                                   # API testing suite
 │   └── FitNest_Gym.postman_collection.json    # Complete Postman test collection
 │
-├── screenshots/                               # API response visual evidence
-│   ├── 01_root_health_check.png
-│   ├── 02_get_all_lockers.png
-│   ├── 03_filter_lockers_floor.png
-│   ├── 04_create_locker.png
-│   ├── 05_twist1_soft_delete_12.png
-│   ├── 06_twist1_get_deleted_12.png
-│   ├── 07_twist1_restore_12.png
-│   ├── 08_twist1_get_restored_12.png
-│   ├── 09_get_all_members.png
-│   ├── 10_create_member.png
-│   ├── 11_create_allotment_pending.png
-│   ├── 12_prevent_double_allotment.png
-│   ├── 13_join_allotments_details.png
-│   ├── 14_twist2_pending_to_approved.png
-│   ├── 15_twist2_approved_to_pending_rejected.png
-│   ├── 16_auth_register.png
-│   ├── 17_auth_login_jwt.png
-│   ├── 18_rbac_protected_profile.png
-│   ├── 19_rbac_admin_forbidden.png
-│   └── 20_automated_verification_tests.png
+├── screenshots/                               # Windows 11 Postman test execution evidence
+│   └── windows/
+│       ├── win_01_root_health_check.png
+│       ├── win_02_get_all_lockers.png
+│       ├── win_03_filter_lockers_floor.png
+│       ├── win_04_create_locker.png
+│       ├── win_05_twist1_soft_delete_12.png
+│       ├── win_06_twist1_get_deleted_12.png
+│       ├── win_07_twist1_restore_12.png
+│       ├── win_08_twist1_get_restored_12.png
+│       ├── win_09_get_all_members.png
+│       ├── win_10_create_member.png
+│       ├── win_11_create_allotment_pending.png
+│       ├── win_12_prevent_double_allotment.png
+│       ├── win_13_join_allotments_details.png
+│       ├── win_14_twist2_pending_to_approved.png
+│       ├── win_15_twist2_approved_to_pending_rejected.png
+│       ├── win_16_auth_register.png
+│       ├── win_17_auth_login_jwt.png
+│       ├── win_18_rbac_protected_profile.png
+│       ├── win_19_rbac_admin_forbidden.png
+│       └── win_20_automated_verification_tests.png
 │
 ├── test/                                      # Automated testing
 │   └── verify.js                              # 29-point assertion suite (npm test)
@@ -254,7 +255,109 @@ npm test
 
 ---
 
-## 8. Twist Explanations and Test Scenarios
+## 8. API Execution Screenshots (Postman for Windows 11)
+
+### 8.1 Root API Health Check & Info
+**Endpoint:** `GET /` — Returns status 200 OK and syllabus modules mapping.  
+![Root API Health](screenshots/windows/win_01_root_health_check.png)
+
+---
+
+### 8.2 Lockers Management & Twist 1 (Soft Delete & Restore)
+
+#### 1. Get All Active Lockers
+**Endpoint:** `GET /lockers` — Excludes soft-deleted lockers (`deleted = 0`).  
+![Get All Lockers](screenshots/windows/win_02_get_all_lockers.png)
+
+#### 2. Search / Filter Lockers by Floor
+**Endpoint:** `GET /lockers?floor=2` — Returns only active lockers located on Floor 2.  
+![Filter Lockers by Floor](screenshots/windows/win_03_filter_lockers_floor.png)
+
+#### 3. Create a New Locker
+**Endpoint:** `POST /lockers` — Validates non-empty name and integer floor $\ge 0$.  
+![Create Locker](screenshots/windows/win_04_create_locker.png)
+
+#### 4. Twist 1 (Step 1): Soft-Delete Locker 12
+**Endpoint:** `DELETE /lockers/12` — Sets `deleted = 1` without destroying database row.  
+![Soft Delete Locker 12](screenshots/windows/win_05_twist1_soft_delete_12.png)
+
+#### 5. Twist 1 (Step 2): Verify Locker 12 is Hidden
+**Endpoint:** `GET /lockers/12` — Returns 404 Not Found while soft-deleted.  
+![Verify Locker 12 Hidden](screenshots/windows/win_06_twist1_get_deleted_12.png)
+
+#### 6. Twist 1 (Step 3): Restore Locker 12
+**Endpoint:** `POST /lockers/12/restore` — Sets `deleted = 0` to reactivate the locker.  
+![Restore Locker 12](screenshots/windows/win_07_twist1_restore_12.png)
+
+#### 7. Twist 1 (Step 4): Verify Locker 12 Reappeared in Active Use
+**Endpoint:** `GET /lockers/12` — Returns 200 OK with restored locker details.  
+![Verify Locker 12 Restored](screenshots/windows/win_08_twist1_get_restored_12.png)
+
+---
+
+### 8.3 Gym Members Management
+
+#### 1. Get All Gym Members
+**Endpoint:** `GET /members` — Returns all registered gym members.  
+![Get All Members](screenshots/windows/win_09_get_all_members.png)
+
+#### 2. Register a New Gym Member
+**Endpoint:** `POST /members` — Validates non-empty member name.  
+![Create Member](screenshots/windows/win_10_create_member.png)
+
+---
+
+### 8.4 Allotments, Double-Allotment Prevention & Twist 2 (Status Flow)
+
+#### 1. Create Allotment (Initial Status Starts as 'pending')
+**Endpoint:** `POST /allotments` — Starts strictly in `pending` state.  
+![Create Allotment](screenshots/windows/win_11_create_allotment_pending.png)
+
+#### 2. Client Problem Fix: Prevent Duplicate Active Allotment
+**Endpoint:** `POST /allotments` — Rejects assigning an already occupied locker with HTTP 400.  
+![Prevent Double Allotment](screenshots/windows/win_12_prevent_double_allotment.png)
+
+#### 3. Relational SQL JOIN Query: Allotment Details
+**Endpoint:** `GET /allotments/details` — Joins allotments, members, and lockers tables.  
+![Allotment JOIN Query](screenshots/windows/win_13_join_allotments_details.png)
+
+#### 4. Twist 2 (Step 1): Valid Status Move (`pending` $\rightarrow$ `approved`)
+**Endpoint:** `PATCH /allotments/:id/status` — Single-step forward transition succeeds (200 OK).  
+![Status Pending to Approved](screenshots/windows/win_14_twist2_pending_to_approved.png)
+
+#### 5. Twist 2 (Step 2): Backward Move Rejected (`approved` $\rightarrow$ `pending`)
+**Endpoint:** `PATCH /allotments/:id/status` — Reverses state rejected with HTTP 400 "Invalid status change".  
+![Status Backward Move Rejected](screenshots/windows/win_15_twist2_approved_to_pending_rejected.png)
+
+---
+
+### 8.5 Authentication & Role-Based Access Control (Modules 4 & 5)
+
+#### 1. User Registration with bcrypt Password Hashing
+**Endpoint:** `POST /auth/register` — Hashes password with 10 salt rounds.  
+![User Registration](screenshots/windows/win_16_auth_register.png)
+
+#### 2. User Login & JWT Token Generation
+**Endpoint:** `POST /auth/login` — Verifies password hash and issues Bearer JWT token.  
+![User Login JWT](screenshots/windows/win_17_auth_login_jwt.png)
+
+#### 3. Protected Route Access via Bearer Token
+**Endpoint:** `GET /api/profile` — Validates JWT and retrieves authenticated user profile.  
+![Protected Profile](screenshots/windows/win_18_rbac_protected_profile.png)
+
+#### 4. Role-Based Access Control (RBAC: Forbidden for Staff)
+**Endpoint:** `GET /api/admin/system-status` — Intercepts non-admin staff users with HTTP 403 Forbidden.  
+![Admin System Status Forbidden](screenshots/windows/win_19_rbac_admin_forbidden.png)
+
+---
+
+### 8.6 Automated Verification Test Runner (Windows PowerShell: 29/29 Passed)
+**Command:** `npm test` — Comprehensive 29-assertion test suite executed in Windows PowerShell terminal.  
+![Windows PowerShell Automated Test Runner](screenshots/windows/win_20_automated_verification_tests.png)
+
+---
+
+## 9. Twist Explanations and Test Scenarios
 
 ### Twist 1 – Soft Delete and Restore (Locker 12)
 - **Concept:** Rather than executing destructive SQL `DELETE FROM lockers`, we set `deleted = 1`. This preserves historical allotment records while hiding the locker from general availability. Restoring sets `deleted = 0`.
@@ -279,10 +382,10 @@ npm test
 
 ---
 
-## 9. Postman and REST Client Usage
+## 10. Postman and REST Client Usage
 
 ### Using Postman:
-1. Open **Postman Desktop**.
+1. Open **Postman Desktop for Windows**.
 2. Click **Import** $\rightarrow$ select `postman/FitNest_Gym.postman_collection.json`.
 3. Open the **Twist Tests** folder and click **Run folder**.
 4. All test assertions will run and pass with green checkmarks.
@@ -294,7 +397,7 @@ npm test
 
 ---
 
-## 10. Demo-Day Cheat Sheet (Viva Questions & Answers)
+## 11. Demo-Day Cheat Sheet (Viva Questions & Answers)
 
 ### Member 1: RAVELLA LOKESH (Server and Routes)
 - **Question:** *How does `server.js` register routes, and how does error-handling middleware catch unhandled exceptions?*
@@ -315,105 +418,3 @@ npm test
 ### Member 5: ANILKUMAR REGELLA (Twists, Auth and Postman)
 - **Question:** *How does JWT authentication and Role-Based Access Control work in this project?*
 - **Answer:** *"When a user logs in via `POST /auth/login`, we verify their password hash with bcrypt and generate a digitally signed JWT token containing their user ID and role (`admin` or `staff`). The `authenticateToken` middleware verifies the Bearer token in the `Authorization` header, while `authorizeRole('admin')` ensures only authorized administrators can reach protected endpoints like `/api/admin/system-status`."*
-
----
-
-## 11. API Testing Screenshots
-
-### 11.1 Root API Health Check & Info
-**Endpoint:** `GET /` — Returns status 200 OK and syllabus modules mapping.  
-![Root API Health](screenshots/01_root_health_check.png)
-
----
-
-### 11.2 Lockers Management & Twist 1 (Soft Delete & Restore)
-
-#### 1. Get All Active Lockers
-**Endpoint:** `GET /lockers` — Excludes soft-deleted lockers (`deleted = 0`).  
-![Get All Lockers](screenshots/02_get_all_lockers.png)
-
-#### 2. Search / Filter Lockers by Floor
-**Endpoint:** `GET /lockers?floor=2` — Returns only active lockers located on Floor 2.  
-![Filter Lockers by Floor](screenshots/03_filter_lockers_floor.png)
-
-#### 3. Create a New Locker
-**Endpoint:** `POST /lockers` — Validates non-empty name and integer floor $\ge 0$.  
-![Create Locker](screenshots/04_create_locker.png)
-
-#### 4. Twist 1 (Step 1): Soft-Delete Locker 12
-**Endpoint:** `DELETE /lockers/12` — Sets `deleted = 1` without destroying database row.  
-![Soft Delete Locker 12](screenshots/05_twist1_soft_delete_12.png)
-
-#### 5. Twist 1 (Step 2): Verify Locker 12 is Hidden
-**Endpoint:** `GET /lockers/12` — Returns 404 Not Found while soft-deleted.  
-![Verify Locker 12 Hidden](screenshots/06_twist1_get_deleted_12.png)
-
-#### 6. Twist 1 (Step 3): Restore Locker 12
-**Endpoint:** `POST /lockers/12/restore` — Sets `deleted = 0` to reactivate the locker.  
-![Restore Locker 12](screenshots/07_twist1_restore_12.png)
-
-#### 7. Twist 1 (Step 4): Verify Locker 12 Reappeared in Active Use
-**Endpoint:** `GET /lockers/12` — Returns 200 OK with restored locker details.  
-![Verify Locker 12 Restored](screenshots/08_twist1_get_restored_12.png)
-
----
-
-### 11.3 Gym Members Management
-
-#### 1. Get All Gym Members
-**Endpoint:** `GET /members` — Returns all registered gym members.  
-![Get All Members](screenshots/09_get_all_members.png)
-
-#### 2. Register a New Gym Member
-**Endpoint:** `POST /members` — Validates non-empty member name.  
-![Create Member](screenshots/10_create_member.png)
-
----
-
-### 11.4 Allotments, Double-Allotment Prevention & Twist 2 (Status Flow)
-
-#### 1. Create Allotment (Initial Status Starts as 'pending')
-**Endpoint:** `POST /allotments` — Starts strictly in `pending` state.  
-![Create Allotment](screenshots/11_create_allotment_pending.png)
-
-#### 2. Client Problem Fix: Prevent Duplicate Active Allotment
-**Endpoint:** `POST /allotments` — Rejects assigning an already occupied locker with HTTP 400.  
-![Prevent Double Allotment](screenshots/12_prevent_double_allotment.png)
-
-#### 3. Relational SQL JOIN Query: Allotment Details
-**Endpoint:** `GET /allotments/details` — Joins allotments, members, and lockers tables.  
-![Allotment JOIN Query](screenshots/13_join_allotments_details.png)
-
-#### 4. Twist 2 (Step 1): Valid Status Move (`pending` $\rightarrow$ `approved`)
-**Endpoint:** `PATCH /allotments/:id/status` — Single-step forward transition succeeds (200 OK).  
-![Status Pending to Approved](screenshots/14_twist2_pending_to_approved.png)
-
-#### 5. Twist 2 (Step 2): Backward Move Rejected (`approved` $\rightarrow$ `pending`)
-**Endpoint:** `PATCH /allotments/:id/status` — Reverses state rejected with HTTP 400 "Invalid status change".  
-![Status Backward Move Rejected](screenshots/15_twist2_approved_to_pending_rejected.png)
-
----
-
-### 11.5 Authentication & Role-Based Access Control (Modules 4 & 5)
-
-#### 1. User Registration with bcrypt Password Hashing
-**Endpoint:** `POST /auth/register` — Hashes password with 10 salt rounds.  
-![User Registration](screenshots/16_auth_register.png)
-
-#### 2. User Login & JWT Token Generation
-**Endpoint:** `POST /auth/login` — Verifies password hash and issues Bearer JWT token.  
-![User Login JWT](screenshots/17_auth_login_jwt.png)
-
-#### 3. Protected Route Access via Bearer Token
-**Endpoint:** `GET /api/profile` — Validates JWT and retrieves authenticated user profile.  
-![Protected Profile](screenshots/18_rbac_protected_profile.png)
-
-#### 4. Role-Based Access Control (RBAC: Forbidden for Staff)
-**Endpoint:** `GET /api/admin/system-status` — Intercepts non-admin staff users with HTTP 403 Forbidden.  
-![Admin System Status Forbidden](screenshots/19_rbac_admin_forbidden.png)
-
----
-
-### 11.6 Automated Verification Test Runner (29/29 Tests Passing)
-**Command:** `npm test` — Comprehensive 29-assertion test suite covering all endpoints, twists, and security modules.  
-![Automated Test Runner Output](screenshots/20_automated_verification_tests.png)
