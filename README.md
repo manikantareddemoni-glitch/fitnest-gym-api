@@ -24,7 +24,7 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 - **Runtime & Framework:** Node.js (v18+) with Express.js (v4)
 - **Database:** SQLite3 via `better-sqlite3` (synchronous, fast, file-based SQL engine with enforced foreign key integrity)
 - **Security:** `jsonwebtoken` (JWT bearer tokens) & `bcryptjs` (password hashing)
-- **API Testing:** Postman Collection v2.1.0 & VS Code REST Client (`group1.http`)
+- **API Testing:** Google Chrome, Postman Collection v2.1.0 & VS Code REST Client (`group1.http`)
 - **Version Control:** Git & GitHub with modular branching per group member
 
 ---
@@ -78,28 +78,28 @@ fitnest-gym-api/
 ├── postman/                                   # API testing suite
 │   └── FitNest_Gym.postman_collection.json    # Complete Postman test collection
 │
-├── screenshots/                               # Windows 11 Postman test execution evidence
-│   └── windows/
-│       ├── win_01_root_health_check.png
-│       ├── win_02_get_all_lockers.png
-│       ├── win_03_filter_lockers_floor.png
-│       ├── win_04_create_locker.png
-│       ├── win_05_twist1_soft_delete_12.png
-│       ├── win_06_twist1_get_deleted_12.png
-│       ├── win_07_twist1_restore_12.png
-│       ├── win_08_twist1_get_restored_12.png
-│       ├── win_09_get_all_members.png
-│       ├── win_10_create_member.png
-│       ├── win_11_create_allotment_pending.png
-│       ├── win_12_prevent_double_allotment.png
-│       ├── win_13_join_allotments_details.png
-│       ├── win_14_twist2_pending_to_approved.png
-│       ├── win_15_twist2_approved_to_pending_rejected.png
-│       ├── win_16_auth_register.png
-│       ├── win_17_auth_login_jwt.png
-│       ├── win_18_rbac_protected_profile.png
-│       ├── win_19_rbac_admin_forbidden.png
-│       └── win_20_automated_verification_tests.png
+├── screenshots/                               # Chrome browser API execution screenshots
+│   └── chrome/
+│       ├── chrome_01_root_health_check.png
+│       ├── chrome_02_get_all_lockers.png
+│       ├── chrome_03_filter_lockers_floor.png
+│       ├── chrome_04_create_locker.png
+│       ├── chrome_05_twist1_soft_delete_12.png
+│       ├── chrome_06_twist1_get_deleted_12.png
+│       ├── chrome_07_twist1_restore_12.png
+│       ├── chrome_08_twist1_get_restored_12.png
+│       ├── chrome_09_get_all_members.png
+│       ├── chrome_10_create_member.png
+│       ├── chrome_11_create_allotment_pending.png
+│       ├── chrome_12_prevent_double_allotment.png
+│       ├── chrome_13_join_allotments_details.png
+│       ├── chrome_14_twist2_pending_to_approved.png
+│       ├── chrome_15_twist2_approved_to_pending_rejected.png
+│       ├── chrome_16_auth_register.png
+│       ├── chrome_17_auth_login_jwt.png
+│       ├── chrome_18_rbac_protected_profile.png
+│       ├── chrome_19_rbac_admin_forbidden.png
+│       └── chrome_20_automated_verification_tests.png
 │
 ├── test/                                      # Automated testing
 │   └── verify.js                              # 29-point assertion suite (npm test)
@@ -255,105 +255,105 @@ npm test
 
 ---
 
-## 8. API Execution Screenshots (Postman for Windows 11)
+## 8. API Execution Screenshots (Google Chrome on Windows)
 
 ### 8.1 Root API Health Check & Info
-**Endpoint:** `GET /` — Returns status 200 OK and syllabus modules mapping.  
-![Root API Health](screenshots/windows/win_01_root_health_check.png)
+**Endpoint:** `GET http://localhost:3000/`  
+![Root API Health](screenshots/chrome/chrome_01_root_health_check.png)
 
 ---
 
 ### 8.2 Lockers Management & Twist 1 (Soft Delete & Restore)
 
 #### 1. Get All Active Lockers
-**Endpoint:** `GET /lockers` — Excludes soft-deleted lockers (`deleted = 0`).  
-![Get All Lockers](screenshots/windows/win_02_get_all_lockers.png)
+**Endpoint:** `GET http://localhost:3000/lockers`  
+![Get All Lockers](screenshots/chrome/chrome_02_get_all_lockers.png)
 
 #### 2. Search / Filter Lockers by Floor
-**Endpoint:** `GET /lockers?floor=2` — Returns only active lockers located on Floor 2.  
-![Filter Lockers by Floor](screenshots/windows/win_03_filter_lockers_floor.png)
+**Endpoint:** `GET http://localhost:3000/lockers?floor=2`  
+![Filter Lockers by Floor](screenshots/chrome/chrome_03_filter_lockers_floor.png)
 
 #### 3. Create a New Locker
-**Endpoint:** `POST /lockers` — Validates non-empty name and integer floor $\ge 0$.  
-![Create Locker](screenshots/windows/win_04_create_locker.png)
+**Endpoint:** `POST http://localhost:3000/lockers`  
+![Create Locker](screenshots/chrome/chrome_04_create_locker.png)
 
 #### 4. Twist 1 (Step 1): Soft-Delete Locker 12
-**Endpoint:** `DELETE /lockers/12` — Sets `deleted = 1` without destroying database row.  
-![Soft Delete Locker 12](screenshots/windows/win_05_twist1_soft_delete_12.png)
+**Endpoint:** `DELETE http://localhost:3000/lockers/12`  
+![Soft Delete Locker 12](screenshots/chrome/chrome_05_twist1_soft_delete_12.png)
 
 #### 5. Twist 1 (Step 2): Verify Locker 12 is Hidden
-**Endpoint:** `GET /lockers/12` — Returns 404 Not Found while soft-deleted.  
-![Verify Locker 12 Hidden](screenshots/windows/win_06_twist1_get_deleted_12.png)
+**Endpoint:** `GET http://localhost:3000/lockers/12`  
+![Verify Locker 12 Hidden](screenshots/chrome/chrome_06_twist1_get_deleted_12.png)
 
 #### 6. Twist 1 (Step 3): Restore Locker 12
-**Endpoint:** `POST /lockers/12/restore` — Sets `deleted = 0` to reactivate the locker.  
-![Restore Locker 12](screenshots/windows/win_07_twist1_restore_12.png)
+**Endpoint:** `POST http://localhost:3000/lockers/12/restore`  
+![Restore Locker 12](screenshots/chrome/chrome_07_twist1_restore_12.png)
 
 #### 7. Twist 1 (Step 4): Verify Locker 12 Reappeared in Active Use
-**Endpoint:** `GET /lockers/12` — Returns 200 OK with restored locker details.  
-![Verify Locker 12 Restored](screenshots/windows/win_08_twist1_get_restored_12.png)
+**Endpoint:** `GET http://localhost:3000/lockers/12`  
+![Verify Locker 12 Restored](screenshots/chrome/chrome_08_twist1_get_restored_12.png)
 
 ---
 
 ### 8.3 Gym Members Management
 
 #### 1. Get All Gym Members
-**Endpoint:** `GET /members` — Returns all registered gym members.  
-![Get All Members](screenshots/windows/win_09_get_all_members.png)
+**Endpoint:** `GET http://localhost:3000/members`  
+![Get All Members](screenshots/chrome/chrome_09_get_all_members.png)
 
 #### 2. Register a New Gym Member
-**Endpoint:** `POST /members` — Validates non-empty member name.  
-![Create Member](screenshots/windows/win_10_create_member.png)
+**Endpoint:** `POST http://localhost:3000/members`  
+![Create Member](screenshots/chrome/chrome_10_create_member.png)
 
 ---
 
 ### 8.4 Allotments, Double-Allotment Prevention & Twist 2 (Status Flow)
 
 #### 1. Create Allotment (Initial Status Starts as 'pending')
-**Endpoint:** `POST /allotments` — Starts strictly in `pending` state.  
-![Create Allotment](screenshots/windows/win_11_create_allotment_pending.png)
+**Endpoint:** `POST http://localhost:3000/allotments`  
+![Create Allotment](screenshots/chrome/chrome_11_create_allotment_pending.png)
 
 #### 2. Client Problem Fix: Prevent Duplicate Active Allotment
-**Endpoint:** `POST /allotments` — Rejects assigning an already occupied locker with HTTP 400.  
-![Prevent Double Allotment](screenshots/windows/win_12_prevent_double_allotment.png)
+**Endpoint:** `POST http://localhost:3000/allotments`  
+![Prevent Double Allotment](screenshots/chrome/chrome_12_prevent_double_allotment.png)
 
 #### 3. Relational SQL JOIN Query: Allotment Details
-**Endpoint:** `GET /allotments/details` — Joins allotments, members, and lockers tables.  
-![Allotment JOIN Query](screenshots/windows/win_13_join_allotments_details.png)
+**Endpoint:** `GET http://localhost:3000/allotments/details`  
+![Allotment JOIN Query](screenshots/chrome/chrome_13_join_allotments_details.png)
 
 #### 4. Twist 2 (Step 1): Valid Status Move (`pending` $\rightarrow$ `approved`)
-**Endpoint:** `PATCH /allotments/:id/status` — Single-step forward transition succeeds (200 OK).  
-![Status Pending to Approved](screenshots/windows/win_14_twist2_pending_to_approved.png)
+**Endpoint:** `PATCH http://localhost:3000/allotments/4/status`  
+![Status Pending to Approved](screenshots/chrome/chrome_14_twist2_pending_to_approved.png)
 
 #### 5. Twist 2 (Step 2): Backward Move Rejected (`approved` $\rightarrow$ `pending`)
-**Endpoint:** `PATCH /allotments/:id/status` — Reverses state rejected with HTTP 400 "Invalid status change".  
-![Status Backward Move Rejected](screenshots/windows/win_15_twist2_approved_to_pending_rejected.png)
+**Endpoint:** `PATCH http://localhost:3000/allotments/4/status`  
+![Status Backward Move Rejected](screenshots/chrome/chrome_15_twist2_approved_to_pending_rejected.png)
 
 ---
 
 ### 8.5 Authentication & Role-Based Access Control (Modules 4 & 5)
 
 #### 1. User Registration with bcrypt Password Hashing
-**Endpoint:** `POST /auth/register` — Hashes password with 10 salt rounds.  
-![User Registration](screenshots/windows/win_16_auth_register.png)
+**Endpoint:** `POST http://localhost:3000/auth/register`  
+![User Registration](screenshots/chrome/chrome_16_auth_register.png)
 
 #### 2. User Login & JWT Token Generation
-**Endpoint:** `POST /auth/login` — Verifies password hash and issues Bearer JWT token.  
-![User Login JWT](screenshots/windows/win_17_auth_login_jwt.png)
+**Endpoint:** `POST http://localhost:3000/auth/login`  
+![User Login JWT](screenshots/chrome/chrome_17_auth_login_jwt.png)
 
 #### 3. Protected Route Access via Bearer Token
-**Endpoint:** `GET /api/profile` — Validates JWT and retrieves authenticated user profile.  
-![Protected Profile](screenshots/windows/win_18_rbac_protected_profile.png)
+**Endpoint:** `GET http://localhost:3000/api/profile`  
+![Protected Profile](screenshots/chrome/chrome_18_rbac_protected_profile.png)
 
 #### 4. Role-Based Access Control (RBAC: Forbidden for Staff)
-**Endpoint:** `GET /api/admin/system-status` — Intercepts non-admin staff users with HTTP 403 Forbidden.  
-![Admin System Status Forbidden](screenshots/windows/win_19_rbac_admin_forbidden.png)
+**Endpoint:** `GET http://localhost:3000/api/admin/system-status`  
+![Admin System Status Forbidden](screenshots/chrome/chrome_19_rbac_admin_forbidden.png)
 
 ---
 
-### 8.6 Automated Verification Test Runner (Windows PowerShell: 29/29 Passed)
-**Command:** `npm test` — Comprehensive 29-assertion test suite executed in Windows PowerShell terminal.  
-![Windows PowerShell Automated Test Runner](screenshots/windows/win_20_automated_verification_tests.png)
+### 8.6 Automated Verification Test Runner (29/29 Tests Passing)
+**Endpoint:** `GET http://localhost:3000/test/verify`  
+![Automated Test Runner Output](screenshots/chrome/chrome_20_automated_verification_tests.png)
 
 ---
 
