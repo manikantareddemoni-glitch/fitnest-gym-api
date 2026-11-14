@@ -1,5 +1,12 @@
 // Automated Test Runner for FitNest Gym REST API
-// Tests all endpoints, validations, Twist 1 (Soft Delete & Restore), and Twist 2 (Status Flow)
+// Tests all syllabus modules (1 to 5):
+// - Lockers CRUD & Floor Filter (Module 3)
+// - Twist 1 Soft Delete & Restore (Module 2 & 3)
+// - Members CRUD (Module 3)
+// - Allotments & Relational JOIN Query (Module 2 & 3)
+// - Twist 2 Status State Machine (Module 3)
+// - Authentication, JWT Token Issuance & User Registration (Module 4)
+// - Authorization, Role-Based Access Control & Error Handling (Module 5)
 
 const http = require('http');
 const app = require('../server');
@@ -33,11 +40,11 @@ server.listen(0, async () => {
         }
     }
 
-    console.log('\n🧪 Running FitNest Gym API Automated Verification Tests...\n');
+    console.log('\n🧪 Running FitNest Gym API Automated Verification Tests (Modules 1 - 5)...\n');
 
     try {
-        // --- LOCKERS & TWIST 1 TESTS ---
-        console.log('--- Lockers & Twist 1 Tests ---');
+        // --- LOCKERS & TWIST 1 TESTS (MODULE 2 & 3) ---
+        console.log('--- Lockers & Twist 1 Tests (Module 2 & 3) ---');
         
         await test('GET /lockers -> 200 returns active lockers', async () => {
             const res = await fetch(`${baseUrl}/lockers`);
@@ -132,8 +139,8 @@ server.listen(0, async () => {
             assertEqual(data.locker.name, 'Locker 999');
         });
 
-        // --- MEMBERS CRUD TESTS ---
-        console.log('\n--- Members CRUD Tests ---');
+        // --- MEMBERS CRUD TESTS (MODULE 3) ---
+        console.log('\n--- Members CRUD Tests (Module 3) ---');
 
         await test('GET /members -> 200', async () => {
             const res = await fetch(`${baseUrl}/members`);
@@ -171,8 +178,8 @@ server.listen(0, async () => {
             assertEqual(data.member.name, 'Kavya Rao');
         });
 
-        // --- ALLOTMENTS & TWIST 2 TESTS ---
-        console.log('\n--- Allotments & Twist 2 Tests ---');
+        // --- ALLOTMENTS & TWIST 2 TESTS (MODULE 2 & 3) ---
+        console.log('\n--- Allotments & Twist 2 Tests (Module 2 & 3) ---');
 
         let createdAllotmentId;
 
@@ -253,6 +260,81 @@ server.listen(0, async () => {
             assertEqual(res.status, 400);
             const data = await res.json();
             assertEqual(data.error, 'Invalid status change');
+        });
+
+        // --- MODULE 4 & 5: AUTHENTICATION & AUTHORIZATION TESTS ---
+        console.log('\n--- Module 4 & 5: Authentication, JWT & RBAC Tests ---');
+
+        await test('POST /auth/register -> 201 (Registers user with hashed password)', async () => {
+            const res = await fetch(`${baseUrl}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: 'trainer1', password: 'trainerPassword123', role: 'staff' })
+            });
+            assertEqual(res.status, 201);
+            const data = await res.json();
+            assertEqual(data.user.username, 'trainer1');
+            assertEqual(data.user.role, 'staff');
+        });
+
+        let staffToken;
+        await test('POST /auth/login -> 200 (Issues JWT token for staff)', async () => {
+            const res = await fetch(`${baseUrl}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: 'staff', password: 'staff123' })
+            });
+            assertEqual(res.status, 200);
+            const data = await res.json();
+            assertEqual(typeof data.token, 'string');
+            staffToken = data.token;
+        });
+
+        let adminToken;
+        await test('POST /auth/login -> 200 (Issues JWT token for admin)', async () => {
+            const res = await fetch(`${baseUrl}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: 'admin', password: 'admin123' })
+            });
+            assertEqual(res.status, 200);
+            const data = await res.json();
+            assertEqual(typeof data.token, 'string');
+            adminToken = data.token;
+        });
+
+        await test('GET /api/profile -> 401 (Rejected when missing JWT token)', async () => {
+            const res = await fetch(`${baseUrl}/api/profile`);
+            assertEqual(res.status, 401);
+            const data = await res.json();
+            assertEqual(data.error, 'Access denied: Missing authentication token');
+        });
+
+        await test('GET /api/profile -> 200 (Authorized with valid Bearer token)', async () => {
+            const res = await fetch(`${baseUrl}/api/profile`, {
+                headers: { 'Authorization': `Bearer ${staffToken}` }
+            });
+            assertEqual(res.status, 200);
+            const data = await res.json();
+            assertEqual(data.user.username, 'staff');
+        });
+
+        await test('GET /api/admin/system-status -> 403 (RBAC: Forbidden for staff role)', async () => {
+            const res = await fetch(`${baseUrl}/api/admin/system-status`, {
+                headers: { 'Authorization': `Bearer ${staffToken}` }
+            });
+            assertEqual(res.status, 403);
+            const data = await res.json();
+            assertEqual(data.error, "Forbidden: Requires 'admin' role");
+        });
+
+        await test('GET /api/admin/system-status -> 200 (RBAC: Authorized for admin role)', async () => {
+            const res = await fetch(`${baseUrl}/api/admin/system-status`, {
+                headers: { 'Authorization': `Bearer ${adminToken}` }
+            });
+            assertEqual(res.status, 200);
+            const data = await res.json();
+            assertEqual(data.authenticatedAdmin, 'admin');
         });
 
     } finally {

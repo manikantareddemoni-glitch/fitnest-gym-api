@@ -1,8 +1,10 @@
 // Owner: Member 2 - Database (SHISHIRA RAVIKANTI, 252U1R1218)
 // Database seed script: populates initial data for testing and demonstrations.
-// Includes 15 lockers (with explicit Locker 12 on Floor 2), 5 members, and sample allotments.
+// Includes 15 lockers (with explicit Locker 12 on Floor 2), 5 members, sample allotments,
+// and default system users (admin and staff) with hashed passwords (Module 4).
 
 const Database = require('better-sqlite3');
+const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 
@@ -11,7 +13,7 @@ const db = new Database(dbPath);
 
 console.log('🌱 Starting FitNest Gym database seeding...');
 
-// Enforce foreign key constraints
+// Enforce foreign key constraints (Module 2)
 db.pragma('foreign_keys = ON');
 
 // Reset database by re-applying schema
@@ -24,13 +26,14 @@ db.exec(`
     DROP TABLE IF EXISTS allotments;
     DROP TABLE IF EXISTS lockers;
     DROP TABLE IF EXISTS members;
+    DROP TABLE IF EXISTS users;
 `);
 db.pragma('foreign_keys = ON');
 db.exec(schema);
 
 console.log('✅ Clean tables created.');
 
-// 1. Seed Members
+// 1. Seed Members (Module 2)
 const insertMember = db.prepare('INSERT INTO members (id, name, phone, email) VALUES (?, ?, ?, ?)');
 const membersData = [
     [1, 'Aarav Patel', '9876543210', 'aarav.patel@fitnest.com'],
@@ -70,11 +73,7 @@ for (const l of lockersData) {
 }
 console.log(`✅ Seeded ${lockersData.length} lockers (including Locker id 12 on floor 2).`);
 
-// 3. Seed Allotments
-// Locker 1 is actively allotted (approved)
-// Locker 6 is actively allotted (pending)
-// Locker 3 was allotted but is now done (free for new allotment)
-// Locker 12 is free and ready for the soft-delete & restore test!
+// 3. Seed Allotments (Module 2)
 const insertAllotment = db.prepare('INSERT INTO allotments (id, member_id, locker_id, status) VALUES (?, ?, ?, ?)');
 const allotmentsData = [
     [1, 1, 1, 'approved'],
@@ -86,4 +85,14 @@ for (const a of allotmentsData) {
     insertAllotment.run(...a);
 }
 console.log(`✅ Seeded ${allotmentsData.length} allotments.`);
+
+// 4. Seed Users (Module 4 & 5: Password Hashing & Roles)
+const insertUser = db.prepare('INSERT INTO users (username, password, role) VALUES (?, ?, ?)');
+const adminHashed = bcrypt.hashSync('admin123', 10);
+const staffHashed = bcrypt.hashSync('staff123', 10);
+
+insertUser.run('admin', adminHashed, 'admin');
+insertUser.run('staff', staffHashed, 'staff');
+console.log('✅ Seeded 2 default users (admin & staff) with bcrypt hashed passwords.');
+
 console.log('🎉 Database seeding completed successfully!\n');

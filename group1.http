@@ -1,21 +1,85 @@
 ### FitNest Gym - Locker Room Management REST API (Group ID: YG-CSE2E-G01)
-### Use with VS Code REST Client extension
+### Syllabus Coverage: Modules 1 to 5 (Use with VS Code REST Client extension)
 
 @baseUrl = http://localhost:3000
 
-### 1. Root Health Check
+# ==============================================================================
+# MODULE 1: Node.js & Express Fundamentals
+# ==============================================================================
+
+### 1. Root API Health & Syllabus Info (Module 1)
 GET {{baseUrl}}/
 
-### 2. Get All Active Lockers (Excludes Soft Deleted)
+# ==============================================================================
+# MODULE 4: Authentication & User Management (JWT + bcrypt)
+# ==============================================================================
+
+### 2. User Registration (Module 4)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "trainer_anil",
+  "password": "strongPassword123",
+  "role": "staff"
+}
+
+### 3. User Login - Staff (Module 4: Generates JWT Token)
+# @name staffLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "staff",
+  "password": "staff123"
+}
+
+### Extract staff token
+@staffToken = {{staffLogin.response.body.token}}
+
+### 4. User Login - Admin (Module 4: Generates Admin JWT Token)
+# @name adminLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### Extract admin token
+@adminToken = {{adminLogin.response.body.token}}
+
+# ==============================================================================
+# MODULE 5: Protected Routes & Role-Based Access Control (RBAC)
+# ==============================================================================
+
+### 5. Access Protected Profile without Token -> Returns 401 Unauthorized
+GET {{baseUrl}}/api/profile
+
+### 6. Access Protected Profile with Staff Token -> Returns 200 OK
+GET {{baseUrl}}/api/profile
+Authorization: Bearer {{staffToken}}
+
+### 7. Access Admin Dashboard with Staff Token -> Returns 403 Forbidden (RBAC)
+GET {{baseUrl}}/api/admin/system-status
+Authorization: Bearer {{staffToken}}
+
+### 8. Access Admin Dashboard with Admin Token -> Returns 200 OK (RBAC Authorized)
+GET {{baseUrl}}/api/admin/system-status
+Authorization: Bearer {{adminToken}}
+
+# ==============================================================================
+# MODULE 2 & 3: Lockers CRUD, Query Params & Twist 1
+# ==============================================================================
+
+### 9. Get All Active Lockers (Excludes Soft Deleted)
 GET {{baseUrl}}/lockers
 
-### 3. Search/Filter Lockers by Floor
+### 10. Query Filter: Lockers on Floor 2
 GET {{baseUrl}}/lockers?floor=2
 
-### 4. Get Locker by ID
-GET {{baseUrl}}/lockers/12
-
-### 5. Create a New Locker
+### 11. Create a New Locker (Module 3: Validation)
 POST {{baseUrl}}/lockers
 Content-Type: application/json
 
@@ -24,34 +88,26 @@ Content-Type: application/json
   "floor": 5
 }
 
-### 6. Update Locker
-PUT {{baseUrl}}/lockers/1
-Content-Type: application/json
-
-{
-  "name": "Locker 101 (Renovated)",
-  "floor": 1
-}
-
-### 7. Twist 1: Soft Delete Locker 12
+### 12. Twist 1: Soft Delete Locker 12 (Sets deleted = 1)
 DELETE {{baseUrl}}/lockers/12
 
-### 8. Twist 1: Verify Locker 12 is Hidden (404)
+### 13. Twist 1: Verify Locker 12 is Hidden (404)
 GET {{baseUrl}}/lockers/12
 
-### 9. Twist 1: Restore Locker 12
+### 14. Twist 1: Restore Locker 12 (Sets deleted = 0)
 POST {{baseUrl}}/lockers/12/restore
 
-### 10. Twist 1: Verify Locker 12 is Back (200)
+### 15. Twist 1: Verify Locker 12 Reappeared (200)
 GET {{baseUrl}}/lockers/12
 
-### 11. Get All Members
+# ==============================================================================
+# MODULE 2 & 3: Members CRUD
+# ==============================================================================
+
+### 16. Get All Members
 GET {{baseUrl}}/members
 
-### 12. Get Member by ID
-GET {{baseUrl}}/members/1
-
-### 13. Create Member
+### 17. Create Gym Member
 POST {{baseUrl}}/members
 Content-Type: application/json
 
@@ -61,7 +117,11 @@ Content-Type: application/json
   "email": "arjun@fitnest.com"
 }
 
-### 14. Create Allotment (Starts as pending)
+# ==============================================================================
+# MODULE 2 & 3: Relational Allotments & Twist 2 (Status Flow)
+# ==============================================================================
+
+### 18. Create Allotment (Starts as pending)
 POST {{baseUrl}}/allotments
 Content-Type: application/json
 
@@ -70,7 +130,7 @@ Content-Type: application/json
   "locker_id": 12
 }
 
-### 15. Prevent Duplicate Active Allotment (Returns 400)
+### 19. Prevent Duplicate Active Allotment -> Returns 400
 POST {{baseUrl}}/allotments
 Content-Type: application/json
 
@@ -79,10 +139,10 @@ Content-Type: application/json
   "locker_id": 12
 }
 
-### 16. Relational JOIN Query: Allotment Details
+### 20. Relational SQL JOIN Query: Allotment Details (Module 2)
 GET {{baseUrl}}/allotments/details
 
-### 17. Twist 2: Status Flow pending -> approved (200)
+### 21. Twist 2: Move pending -> approved (200 OK)
 PATCH {{baseUrl}}/allotments/1/status
 Content-Type: application/json
 
@@ -90,7 +150,7 @@ Content-Type: application/json
   "status": "approved"
 }
 
-### 18. Twist 2: Backward status move rejected (400)
+### 22. Twist 2: Backward move approved -> pending rejected (400 Bad Request)
 PATCH {{baseUrl}}/allotments/1/status
 Content-Type: application/json
 

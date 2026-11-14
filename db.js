@@ -1,5 +1,6 @@
 // Owner: Member 2 - Database (SHISHIRA RAVIKANTI, 252U1R1218)
 // SQLite database connection and reusable database helper queries
+// Maps directly to Module 2 (SQLite & Relational Operations) & Module 4 (User Management)
 
 const Database = require('better-sqlite3');
 const path = require('path');
@@ -10,11 +11,11 @@ const dbPath = path.join(__dirname, 'database', 'fitnest.db');
 const db = new Database(dbPath);
 
 // Crucial: SQLite has foreign keys turned OFF by default.
-// Explicitly turn foreign keys ON to enforce relational integrity.
+// Explicitly turn foreign keys ON to enforce relational integrity (Module 2: Constraints).
 db.pragma('foreign_keys = ON');
 
 /**
- * Initialize tables if they do not exist yet
+ * Module 2: Initialize schema if tables do not exist yet
  */
 function initializeDatabase() {
     const schemaPath = path.join(__dirname, 'database', 'schema.sql');
@@ -28,7 +29,7 @@ function initializeDatabase() {
 initializeDatabase();
 
 /**
- * Reusable Query Functions for Lockers
+ * Reusable Query Functions for Lockers (Module 2: Parameterized Queries & CRUD)
  */
 const lockerQueries = {
     // Get all lockers that are NOT soft-deleted (deleted = 0)
@@ -84,22 +85,19 @@ const lockerQueries = {
 };
 
 /**
- * Reusable Query Functions for Members
+ * Reusable Query Functions for Members (Module 2: CRUD Operations)
  */
 const memberQueries = {
-    // Get all members
     getAll: () => {
         const stmt = db.prepare('SELECT * FROM members ORDER BY id ASC');
         return stmt.all();
     },
 
-    // Get a member by ID
     getById: (id) => {
         const stmt = db.prepare('SELECT * FROM members WHERE id = ?');
         return stmt.get(id);
     },
 
-    // Create a new member
     create: (name, phone, email) => {
         const stmt = db.prepare('INSERT INTO members (name, phone, email) VALUES (?, ?, ?)');
         const result = stmt.run(name, phone || null, email || null);
@@ -111,14 +109,12 @@ const memberQueries = {
         };
     },
 
-    // Update an existing member
     update: (id, name, phone, email) => {
         const stmt = db.prepare('UPDATE members SET name = ?, phone = ?, email = ? WHERE id = ?');
         const result = stmt.run(name, phone || null, email || null, id);
         return result.changes > 0;
     },
 
-    // Delete a member
     delete: (id) => {
         const stmt = db.prepare('DELETE FROM members WHERE id = ?');
         const result = stmt.run(id);
@@ -127,23 +123,19 @@ const memberQueries = {
 };
 
 /**
- * Reusable Query Functions for Allotments
+ * Reusable Query Functions for Allotments (Module 2: Relational Foreign Keys & Joins)
  */
 const allotmentQueries = {
-    // Get all allotments
     getAll: () => {
         const stmt = db.prepare('SELECT * FROM allotments ORDER BY id ASC');
         return stmt.all();
     },
 
-    // Get allotment by ID
     getById: (id) => {
         const stmt = db.prepare('SELECT * FROM allotments WHERE id = ?');
         return stmt.get(id);
     },
 
-    // Check if a locker is currently actively allotted ('pending' or 'approved')
-    // Client problem fix: prevents two members from sharing the same locker!
     findActiveByLockerId: (lockerId) => {
         const stmt = db.prepare(
             `SELECT * FROM allotments 
@@ -152,7 +144,6 @@ const allotmentQueries = {
         return stmt.get(lockerId);
     },
 
-    // Create a new allotment with default status 'pending'
     create: (memberId, lockerId) => {
         const stmt = db.prepare(
             `INSERT INTO allotments (member_id, locker_id, status) 
@@ -167,7 +158,7 @@ const allotmentQueries = {
         };
     },
 
-    // JOIN Endpoint: Combines allotments, members, and lockers tables
+    // Relational SQL JOIN query: joins allotments, members, and lockers tables
     getDetails: () => {
         const stmt = db.prepare(
             `SELECT 
@@ -184,11 +175,40 @@ const allotmentQueries = {
         return stmt.all();
     },
 
-    // Twist 2: Update status of an allotment
     updateStatus: (id, newStatus) => {
         const stmt = db.prepare('UPDATE allotments SET status = ? WHERE id = ?');
         const result = stmt.run(newStatus, id);
         return result.changes > 0;
+    }
+};
+
+/**
+ * Module 4: Reusable Query Functions for Users (Authentication & User Management)
+ */
+const userQueries = {
+    getByUsername: (username) => {
+        const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
+        return stmt.get(username);
+    },
+
+    getById: (id) => {
+        const stmt = db.prepare('SELECT id, username, role, created_at FROM users WHERE id = ?');
+        return stmt.get(id);
+    },
+
+    create: (username, hashedPassword, role = 'staff') => {
+        const stmt = db.prepare('INSERT INTO users (username, password, role) VALUES (?, ?, ?)');
+        const result = stmt.run(username, hashedPassword, role);
+        return {
+            id: result.lastInsertRowid,
+            username,
+            role
+        };
+    },
+
+    getAll: () => {
+        const stmt = db.prepare('SELECT id, username, role, created_at FROM users ORDER BY id ASC');
+        return stmt.all();
     }
 };
 
@@ -197,5 +217,6 @@ module.exports = {
     initializeDatabase,
     lockerQueries,
     memberQueries,
-    allotmentQueries
+    allotmentQueries,
+    userQueries
 };

@@ -19,7 +19,9 @@
   "author": "Group YG-CSE2E-G01",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "better-sqlite3": "^11.8.1",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3"
   }
 }
