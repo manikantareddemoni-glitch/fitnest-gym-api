@@ -1,7 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const { allotmentQueries, memberQueries, lockerQueries } = require("../db");
-const { validateAllotment } = require("../middleware/validate");
+
+function validateAllotment(req, res, next) {
+    const { member_id, locker_id } = req.body;
+    if (
+        member_id === undefined ||
+        member_id === null ||
+        locker_id === undefined ||
+        locker_id === null ||
+        !Number.isInteger(Number(member_id)) ||
+        !Number.isInteger(Number(locker_id))
+    ) {
+        return res.status(400).json({ error: "member_id and locker_id are required" });
+    }
+    req.body.member_id = Number(member_id);
+    req.body.locker_id = Number(locker_id);
+    next();
+}
 
 router.get("/details", (req, res) => {
     const details = allotmentQueries.getDetails();

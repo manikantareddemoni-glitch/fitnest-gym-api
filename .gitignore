@@ -3,11 +3,9 @@ node_modules/
 
 # SQLite Database files (generated during runtime/seeding)
 *.db
-!/fitnest.db
 *.db-journal
 *.db-wal
 *.db-shm
-src/db/*.db
 
 # Logs and environment files
 npm-debug.log*
@@ -16,4 +14,3 @@ yarn-error.log*
 .env
 .DS_Store
 Thumbs.db
-

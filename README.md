@@ -62,56 +62,48 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 ```text
 fitnest-gym-api/
 │
-├── .gitignore                                 # Git ignore patterns
-├── app.js                                     # Main Express application & database queries
-├── fitnest.db                                 # SQLite database file (root)
-├── server.js                                  # Server entry point
-├── db.js                                      # SQLite connection & query helpers
-├── group1.http                                # VS Code REST Client test requests
-├── package.json                               # npm project manifest
-├── README.md                                  # Academic documentation
-│
 ├── database/                                  # Database schema and seed script
 │   ├── schema.sql                             # SQL DDL for members, lockers, allotments, users
 │   └── seed.js                                # Seed script with 15 lockers, members, allotments, users
 │
-├── routes/                                    # Modular route handlers
+├── postman/                                   # API testing suite
+│   └── FitNest_Gym.postman_collection.json    # Complete Postman test collection
+│
+├── routes/                                    # Modular route handlers & input validation
 │   ├── authRoutes.js                          # User Registration, Login, JWT Issuance, User Management
 │   ├── lockerRoutes.js                        # Locker CRUD, floor filter, soft delete & restore
 │   ├── memberRoutes.js                        # Gym Member CRUD
 │   └── allotmentRoutes.js                     # Allotment assign, JOIN query, status flow
 │
-├── middleware/                                # Request validation middleware
-│   └── validate.js                            # Request body and query param validation
-│
-├── postman/                                   # API testing suite
-│   └── FitNest_Gym.postman_collection.json    # Complete Postman test collection
-│
 ├── screenshots/                               # Chrome browser API execution screenshots
-│   └── chrome/
-│       ├── chrome_01_root_health_check.png
-│       ├── chrome_02_get_all_lockers.png
-│       ├── chrome_03_filter_lockers_floor.png
-│       ├── chrome_04_create_locker.png
-│       ├── chrome_05_twist1_soft_delete_12.png
-│       ├── chrome_06_twist1_get_deleted_12.png
-│       ├── chrome_07_twist1_restore_12.png
-│       ├── chrome_08_twist1_get_restored_12.png
-│       ├── chrome_09_get_all_members.png
-│       ├── chrome_10_create_member.png
-│       ├── chrome_11_create_allotment_pending.png
-│       ├── chrome_12_prevent_double_allotment.png
-│       ├── chrome_13_join_allotments_details.png
-│       ├── chrome_14_twist2_pending_to_approved.png
-│       ├── chrome_15_twist2_approved_to_pending_rejected.png
-│       ├── chrome_16_auth_register.png
-│       ├── chrome_17_auth_login_jwt.png
-│       ├── chrome_18_protected_profile.png
-│       ├── chrome_19_auth_users_management.png
-│       └── chrome_20_automated_verification_tests.png
+│   ├── 01_root_health_check.png
+│   ├── 02_get_all_lockers.png
+│   ├── 03_filter_lockers_floor.png
+│   ├── 04_create_locker.png
+│   ├── 05_twist1_soft_delete_12.png
+│   ├── 06_twist1_get_deleted_12.png
+│   ├── 07_twist1_restore_12.png
+│   ├── 08_twist1_get_restored_12.png
+│   ├── 09_get_all_members.png
+│   ├── 10_create_member.png
+│   ├── 11_create_allotment_pending.png
+│   ├── 12_prevent_double_allotment.png
+│   ├── 13_join_allotments_details.png
+│   ├── 14_twist2_pending_to_approved.png
+│   ├── 15_twist2_approved_to_pending_rejected.png
+│   ├── 16_auth_register.png
+│   ├── 17_auth_login_jwt.png
+│   ├── 18_protected_profile.png
+│   ├── 19_auth_users_management.png
+│   └── 20_automated_verification_tests.png
 │
-└── test/                                      # Automated testing
-    └── verify.js                              # 27-point assertion suite (npm test)
+├── .gitignore                                 # Git ignore patterns
+├── db.js                                      # SQLite connection & query helpers
+├── group1.http                                # VS Code REST Client test requests
+├── package-lock.json                          # Lockfile
+├── package.json                               # npm project manifest
+├── README.md                                  # Academic documentation
+└── server.js                                  # Main application entry point
 ```
 
 ---
@@ -214,11 +206,8 @@ npm start
 ```
 *The server will start listening at `http://localhost:3000`.*
 
-### Step 5: (Optional) Run Automated Verification Suite
-Runs the built-in 27-point assertion suite covering syllabus modules 1 to 4:
-```bash
-npm test
-```
+### Step 5: Test the APIs
+Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or open `group1.http` in VS Code to test all endpoints.
 
 ---
 
@@ -257,7 +246,7 @@ npm test
 
 ### 8.1 Root API Health Check & Info
 **Endpoint:** `GET http://localhost:3000/`  
-![Root API Health](screenshots/chrome/chrome_01_root_health_check.png)
+![Root API Health](screenshots/01_root_health_check.png)
 
 ---
 
@@ -265,31 +254,31 @@ npm test
 
 #### 1. Get All Active Lockers
 **Endpoint:** `GET http://localhost:3000/lockers`  
-![Get All Lockers](screenshots/chrome/chrome_02_get_all_lockers.png)
+![Get All Lockers](screenshots/02_get_all_lockers.png)
 
 #### 2. Search / Filter Lockers by Floor
 **Endpoint:** `GET http://localhost:3000/lockers?floor=2`  
-![Filter Lockers by Floor](screenshots/chrome/chrome_03_filter_lockers_floor.png)
+![Filter Lockers by Floor](screenshots/03_filter_lockers_floor.png)
 
 #### 3. Create a New Locker
 **Endpoint:** `POST http://localhost:3000/lockers`  
-![Create Locker](screenshots/chrome/chrome_04_create_locker.png)
+![Create Locker](screenshots/04_create_locker.png)
 
 #### 4. Twist 1 (Step 1): Soft-Delete Locker 12
 **Endpoint:** `DELETE http://localhost:3000/lockers/12`  
-![Soft Delete Locker 12](screenshots/chrome/chrome_05_twist1_soft_delete_12.png)
+![Soft Delete Locker 12](screenshots/05_twist1_soft_delete_12.png)
 
 #### 5. Twist 1 (Step 2): Verify Locker 12 is Hidden
 **Endpoint:** `GET http://localhost:3000/lockers/12`  
-![Verify Locker 12 Hidden](screenshots/chrome/chrome_06_twist1_get_deleted_12.png)
+![Verify Locker 12 Hidden](screenshots/06_twist1_get_deleted_12.png)
 
 #### 6. Twist 1 (Step 3): Restore Locker 12
 **Endpoint:** `POST http://localhost:3000/lockers/12/restore`  
-![Restore Locker 12](screenshots/chrome/chrome_07_twist1_restore_12.png)
+![Restore Locker 12](screenshots/07_twist1_restore_12.png)
 
 #### 7. Twist 1 (Step 4): Verify Locker 12 Reappeared in Active Use
 **Endpoint:** `GET http://localhost:3000/lockers/12`  
-![Verify Locker 12 Restored](screenshots/chrome/chrome_08_twist1_get_restored_12.png)
+![Verify Locker 12 Restored](screenshots/08_twist1_get_restored_12.png)
 
 ---
 
@@ -297,11 +286,11 @@ npm test
 
 #### 1. Get All Gym Members
 **Endpoint:** `GET http://localhost:3000/members`  
-![Get All Members](screenshots/chrome/chrome_09_get_all_members.png)
+![Get All Members](screenshots/09_get_all_members.png)
 
 #### 2. Register a New Gym Member
 **Endpoint:** `POST http://localhost:3000/members`  
-![Create Member](screenshots/chrome/chrome_10_create_member.png)
+![Create Member](screenshots/10_create_member.png)
 
 ---
 
@@ -309,23 +298,23 @@ npm test
 
 #### 1. Create Allotment (Initial Status Starts as 'pending')
 **Endpoint:** `POST http://localhost:3000/allotments`  
-![Create Allotment](screenshots/chrome/chrome_11_create_allotment_pending.png)
+![Create Allotment](screenshots/11_create_allotment_pending.png)
 
 #### 2. Client Problem Fix: Prevent Duplicate Active Allotment
 **Endpoint:** `POST http://localhost:3000/allotments`  
-![Prevent Double Allotment](screenshots/chrome/chrome_12_prevent_double_allotment.png)
+![Prevent Double Allotment](screenshots/12_prevent_double_allotment.png)
 
 #### 3. Relational SQL JOIN Query: Allotment Details
 **Endpoint:** `GET http://localhost:3000/allotments/details`  
-![Allotment JOIN Query](screenshots/chrome/chrome_13_join_allotments_details.png)
+![Allotment JOIN Query](screenshots/13_join_allotments_details.png)
 
 #### 4. Twist 2 (Step 1): Valid Status Move (`pending` $\rightarrow$ `approved`)
 **Endpoint:** `PATCH http://localhost:3000/allotments/4/status`  
-![Status Pending to Approved](screenshots/chrome/chrome_14_twist2_pending_to_approved.png)
+![Status Pending to Approved](screenshots/14_twist2_pending_to_approved.png)
 
 #### 5. Twist 2 (Step 2): Backward Move Rejected (`approved` $\rightarrow$ `pending`)
 **Endpoint:** `PATCH http://localhost:3000/allotments/4/status`  
-![Status Backward Move Rejected](screenshots/chrome/chrome_15_twist2_approved_to_pending_rejected.png)
+![Status Backward Move Rejected](screenshots/15_twist2_approved_to_pending_rejected.png)
 
 ---
 
@@ -333,25 +322,25 @@ npm test
 
 #### 1. User Registration with bcrypt Password Hashing
 **Endpoint:** `POST http://localhost:3000/auth/register`  
-![User Registration](screenshots/chrome/chrome_16_auth_register.png)
+![User Registration](screenshots/16_auth_register.png)
 
 #### 2. User Login & JWT Token Generation
 **Endpoint:** `POST http://localhost:3000/auth/login`  
-![User Login JWT](screenshots/chrome/chrome_17_auth_login_jwt.png)
+![User Login JWT](screenshots/17_auth_login_jwt.png)
 
 #### 3. Protected Route Access via Bearer Token
 **Endpoint:** `GET http://localhost:3000/api/profile`  
-![Protected Profile](screenshots/chrome/chrome_18_protected_profile.png)
+![Protected Profile](screenshots/18_protected_profile.png)
 
 #### 4. User Management (List Users)
 **Endpoint:** `GET http://localhost:3000/auth/users`  
-![User Management](screenshots/chrome/chrome_19_auth_users_management.png)
+![User Management](screenshots/19_auth_users_management.png)
 
 ---
 
 ### 8.6 Automated Verification Test Runner (27/27 Tests Passing)
 **Endpoint:** `GET http://localhost:3000/test/verify`  
-![Automated Test Runner Output](screenshots/chrome/chrome_20_automated_verification_tests.png)
+![Automated Test Runner Output](screenshots/20_automated_verification_tests.png)
 
 ---
 
