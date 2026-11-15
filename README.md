@@ -255,10 +255,10 @@ Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or ope
 
 ## 8. API Execution Screenshots (Google Chrome on Windows)
 
-> **Live Base URL:** `https://fitnest-gym-feku.onrender.com`
+> **Live Base URL:** [https://fitnest-gym-feku.onrender.com](https://fitnest-gym-feku.onrender.com)
 
 ### 8.1 Root API Health Check & Info
-**Live Endpoint:** `GET https://fitnest-gym-feku.onrender.com/`  
+**Live Endpoint:** [GET https://fitnest-gym-feku.onrender.com/](https://fitnest-gym-feku.onrender.com/)  
 ![Root API Health](screenshots/01_root_health_check.png)
 
 ---
@@ -266,31 +266,31 @@ Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or ope
 ### 8.2 Lockers Management & Twist 1 (Soft Delete & Restore)
 
 #### 1. Get All Active Lockers
-**Live Endpoint:** `GET https://fitnest-gym-feku.onrender.com/lockers`  
+**Live Endpoint:** [GET https://fitnest-gym-feku.onrender.com/lockers](https://fitnest-gym-feku.onrender.com/lockers)  
 ![Get All Lockers](screenshots/02_get_all_lockers.png)
 
 #### 2. Search / Filter Lockers by Floor
-**Live Endpoint:** `GET https://fitnest-gym-feku.onrender.com/lockers?floor=2`  
+**Live Endpoint:** [GET https://fitnest-gym-feku.onrender.com/lockers?floor=2](https://fitnest-gym-feku.onrender.com/lockers?floor=2)  
 ![Filter Lockers by Floor](screenshots/03_filter_lockers_floor.png)
 
 #### 3. Create a New Locker
-**Live Endpoint:** `POST https://fitnest-gym-feku.onrender.com/lockers`  
+**Live Endpoint:** `POST` [https://fitnest-gym-feku.onrender.com/lockers](https://fitnest-gym-feku.onrender.com/lockers)  
 ![Create Locker](screenshots/04_create_locker.png)
 
 #### 4. Twist 1 (Step 1): Soft-Delete Locker 12
-**Live Endpoint:** `DELETE https://fitnest-gym-feku.onrender.com/lockers/12`  
+**Live Endpoint:** `DELETE` [https://fitnest-gym-feku.onrender.com/lockers/12](https://fitnest-gym-feku.onrender.com/lockers/12)  
 ![Soft Delete Locker 12](screenshots/05_twist1_soft_delete_12.png)
 
 #### 5. Twist 1 (Step 2): Verify Locker 12 is Hidden
-**Live Endpoint:** `GET https://fitnest-gym-feku.onrender.com/lockers/12`  
+**Live Endpoint:** [GET https://fitnest-gym-feku.onrender.com/lockers/12](https://fitnest-gym-feku.onrender.com/lockers/12)  
 ![Verify Locker 12 Hidden](screenshots/06_twist1_get_deleted_12.png)
 
 #### 6. Twist 1 (Step 3): Restore Locker 12
-**Live Endpoint:** `POST https://fitnest-gym-feku.onrender.com/lockers/12/restore`  
+**Live Endpoint:** `POST` [https://fitnest-gym-feku.onrender.com/lockers/12/restore](https://fitnest-gym-feku.onrender.com/lockers/12/restore)  
 ![Restore Locker 12](screenshots/07_twist1_restore_12.png)
 
 #### 7. Twist 1 (Step 4): Verify Locker 12 Reappeared in Active Use
-**Live Endpoint:** `GET https://fitnest-gym-feku.onrender.com/lockers/12`  
+**Live Endpoint:** [GET https://fitnest-gym-feku.onrender.com/lockers/12](https://fitnest-gym-feku.onrender.com/lockers/12)  
 ![Verify Locker 12 Restored](screenshots/08_twist1_get_restored_12.png)
 
 ---
@@ -298,11 +298,11 @@ Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or ope
 ### 8.3 Gym Members Management
 
 #### 1. Get All Gym Members
-**Live Endpoint:** `GET https://fitnest-gym-feku.onrender.com/members`  
+**Live Endpoint:** [GET https://fitnest-gym-feku.onrender.com/members](https://fitnest-gym-feku.onrender.com/members)  
 ![Get All Members](screenshots/09_get_all_members.png)
 
 #### 2. Register a New Gym Member
-**Live Endpoint:** `POST https://fitnest-gym-feku.onrender.com/members`  
+**Live Endpoint:** `POST` [https://fitnest-gym-feku.onrender.com/members](https://fitnest-gym-feku.onrender.com/members)  
 ![Create Member](screenshots/10_create_member.png)
 
 ---
@@ -310,23 +310,23 @@ Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or ope
 ### 8.4 Allotments, Double-Allotment Prevention & Twist 2 (Status Flow)
 
 #### 1. Create Allotment (Initial Status Starts as 'pending')
-**Live Endpoint:** `POST https://fitnest-gym-feku.onrender.com/allotments`  
+**Live Endpoint:** `POST` [https://fitnest-gym-feku.onrender.com/allotments](https://fitnest-gym-feku.onrender.com/allotments)  
 ![Create Allotment](screenshots/11_create_allotment_pending.png)
 
 #### 2. Client Problem Fix: Prevent Duplicate Active Allotment
-**Live Endpoint:** `POST https://fitnest-gym-feku.onrender.com/allotments`  
+**Live Endpoint:** `POST` [https://fitnest-gym-feku.onrender.com/allotments](https://fitnest-gym-feku.onrender.com/allotments)  
 ![Prevent Duplicate Allotment](screenshots/12_prevent_double_allotment.png)
 
 #### 3. Relational SQL JOIN Query: Allotment Details
-**Live Endpoint:** `GET https://fitnest-gym-feku.onrender.com/allotments/details`  
+**Live Endpoint:** [GET https://fitnest-gym-feku.onrender.com/allotments/details](https://fitnest-gym-feku.onrender.com/allotments/details)  
 ![Allotment JOIN Query](screenshots/13_join_allotments_details.png)
 
 #### 4. Twist 2 (Step 1): Valid Status Move (`pending` $\rightarrow$ `approved`)
-**Live Endpoint:** `PATCH https://fitnest-gym-feku.onrender.com/allotments/4/status`  
+**Live Endpoint:** `PATCH` [https://fitnest-gym-feku.onrender.com/allotments/4/status](https://fitnest-gym-feku.onrender.com/allotments/4/status)  
 ![Status Pending to Approved](screenshots/14_twist2_pending_to_approved.png)
 
 #### 5. Twist 2 (Step 2): Backward Move Rejected (`approved` $\rightarrow$ `pending`)
-**Live Endpoint:** `PATCH https://fitnest-gym-feku.onrender.com/allotments/4/status`  
+**Live Endpoint:** `PATCH` [https://fitnest-gym-feku.onrender.com/allotments/4/status](https://fitnest-gym-feku.onrender.com/allotments/4/status)  
 ![Status Backward Move Rejected](screenshots/15_twist2_approved_to_pending_rejected.png)
 
 ---
@@ -334,19 +334,19 @@ Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or ope
 ### 8.5 Authentication & User Management (Module 4)
 
 #### 1. User Registration with bcrypt Password Hashing
-**Live Endpoint:** `POST https://fitnest-gym-feku.onrender.com/auth/register`  
+**Live Endpoint:** `POST` [https://fitnest-gym-feku.onrender.com/auth/register](https://fitnest-gym-feku.onrender.com/auth/register)  
 ![User Registration](screenshots/16_auth_register.png)
 
 #### 2. User Login & JWT Token Generation
-**Live Endpoint:** `POST https://fitnest-gym-feku.onrender.com/auth/login`  
+**Live Endpoint:** `POST` [https://fitnest-gym-feku.onrender.com/auth/login](https://fitnest-gym-feku.onrender.com/auth/login)  
 ![User Login JWT](screenshots/17_auth_login_jwt.png)
 
 #### 3. Protected Route Access via Bearer Token
-**Live Endpoint:** `GET https://fitnest-gym-feku.onrender.com/api/profile`  
+**Live Endpoint:** [GET https://fitnest-gym-feku.onrender.com/api/profile](https://fitnest-gym-feku.onrender.com/api/profile)  
 ![Protected Profile](screenshots/18_protected_profile.png)
 
 #### 4. User Management (List Users)
-**Live Endpoint:** `GET https://fitnest-gym-feku.onrender.com/auth/users`  
+**Live Endpoint:** [GET https://fitnest-gym-feku.onrender.com/auth/users](https://fitnest-gym-feku.onrender.com/auth/users)  
 ![User Management](screenshots/19_auth_users_management.png)
 
 ---
