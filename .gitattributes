@@ -1,7 +1,4 @@
-*.js linguist-language=JavaScript
+* linguist-detectable=false
 *.js linguist-detectable=true
-*.py linguist-detectable=false
-*.sql linguist-detectable=false
-*.json linguist-detectable=false
-*.http linguist-detectable=false
-*.md linguist-detectable=false
+*.js linguist-language=JavaScript
+
