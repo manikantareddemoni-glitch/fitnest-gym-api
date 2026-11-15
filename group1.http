@@ -1,4 +1,5 @@
-@baseUrl = http://localhost:3000
+@baseUrl = https://fitnest-gym-feku.onrender.com
+@localUrl = http://localhost:3000
 
 ### 1. Root API Health & Info
 GET {{baseUrl}}/
