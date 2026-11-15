@@ -245,7 +245,7 @@ Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or ope
 ## 8. API Execution Screenshots (Google Chrome on Windows)
 
 ### 8.1 Root API Health Check & Info
-**Endpoint:** `GET http://localhost:3000/`  
+**Endpoint:** `GET /`  
 ![Root API Health](screenshots/01_root_health_check.png)
 
 ---
@@ -253,31 +253,31 @@ Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or ope
 ### 8.2 Lockers Management & Twist 1 (Soft Delete & Restore)
 
 #### 1. Get All Active Lockers
-**Endpoint:** `GET http://localhost:3000/lockers`  
+**Endpoint:** `GET /lockers`  
 ![Get All Lockers](screenshots/02_get_all_lockers.png)
 
 #### 2. Search / Filter Lockers by Floor
-**Endpoint:** `GET http://localhost:3000/lockers?floor=2`  
+**Endpoint:** `GET /lockers?floor=2`  
 ![Filter Lockers by Floor](screenshots/03_filter_lockers_floor.png)
 
 #### 3. Create a New Locker
-**Endpoint:** `POST http://localhost:3000/lockers`  
+**Endpoint:** `POST /lockers`  
 ![Create Locker](screenshots/04_create_locker.png)
 
 #### 4. Twist 1 (Step 1): Soft-Delete Locker 12
-**Endpoint:** `DELETE http://localhost:3000/lockers/12`  
+**Endpoint:** `DELETE /lockers/12`  
 ![Soft Delete Locker 12](screenshots/05_twist1_soft_delete_12.png)
 
 #### 5. Twist 1 (Step 2): Verify Locker 12 is Hidden
-**Endpoint:** `GET http://localhost:3000/lockers/12`  
+**Endpoint:** `GET /lockers/12`  
 ![Verify Locker 12 Hidden](screenshots/06_twist1_get_deleted_12.png)
 
 #### 6. Twist 1 (Step 3): Restore Locker 12
-**Endpoint:** `POST http://localhost:3000/lockers/12/restore`  
+**Endpoint:** `POST /lockers/12/restore`  
 ![Restore Locker 12](screenshots/07_twist1_restore_12.png)
 
 #### 7. Twist 1 (Step 4): Verify Locker 12 Reappeared in Active Use
-**Endpoint:** `GET http://localhost:3000/lockers/12`  
+**Endpoint:** `GET /lockers/12`  
 ![Verify Locker 12 Restored](screenshots/08_twist1_get_restored_12.png)
 
 ---
@@ -285,11 +285,11 @@ Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or ope
 ### 8.3 Gym Members Management
 
 #### 1. Get All Gym Members
-**Endpoint:** `GET http://localhost:3000/members`  
+**Endpoint:** `GET /members`  
 ![Get All Members](screenshots/09_get_all_members.png)
 
 #### 2. Register a New Gym Member
-**Endpoint:** `POST http://localhost:3000/members`  
+**Endpoint:** `POST /members`  
 ![Create Member](screenshots/10_create_member.png)
 
 ---
@@ -297,23 +297,23 @@ Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or ope
 ### 8.4 Allotments, Double-Allotment Prevention & Twist 2 (Status Flow)
 
 #### 1. Create Allotment (Initial Status Starts as 'pending')
-**Endpoint:** `POST http://localhost:3000/allotments`  
+**Endpoint:** `POST /allotments`  
 ![Create Allotment](screenshots/11_create_allotment_pending.png)
 
 #### 2. Client Problem Fix: Prevent Duplicate Active Allotment
-**Endpoint:** `POST http://localhost:3000/allotments`  
-![Prevent Double Allotment](screenshots/12_prevent_double_allotment.png)
+**Endpoint:** `POST /allotments`  
+![Prevent Duplicate Allotment](screenshots/12_prevent_double_allotment.png)
 
 #### 3. Relational SQL JOIN Query: Allotment Details
-**Endpoint:** `GET http://localhost:3000/allotments/details`  
+**Endpoint:** `GET /allotments/details`  
 ![Allotment JOIN Query](screenshots/13_join_allotments_details.png)
 
 #### 4. Twist 2 (Step 1): Valid Status Move (`pending` $\rightarrow$ `approved`)
-**Endpoint:** `PATCH http://localhost:3000/allotments/4/status`  
+**Endpoint:** `PATCH /allotments/4/status`  
 ![Status Pending to Approved](screenshots/14_twist2_pending_to_approved.png)
 
 #### 5. Twist 2 (Step 2): Backward Move Rejected (`approved` $\rightarrow$ `pending`)
-**Endpoint:** `PATCH http://localhost:3000/allotments/4/status`  
+**Endpoint:** `PATCH /allotments/4/status`  
 ![Status Backward Move Rejected](screenshots/15_twist2_approved_to_pending_rejected.png)
 
 ---
@@ -321,25 +321,25 @@ Use the included `postman/FitNest_Gym.postman_collection.json` in Postman or ope
 ### 8.5 Authentication & User Management (Module 4)
 
 #### 1. User Registration with bcrypt Password Hashing
-**Endpoint:** `POST http://localhost:3000/auth/register`  
+**Endpoint:** `POST /auth/register`  
 ![User Registration](screenshots/16_auth_register.png)
 
 #### 2. User Login & JWT Token Generation
-**Endpoint:** `POST http://localhost:3000/auth/login`  
+**Endpoint:** `POST /auth/login`  
 ![User Login JWT](screenshots/17_auth_login_jwt.png)
 
 #### 3. Protected Route Access via Bearer Token
-**Endpoint:** `GET http://localhost:3000/api/profile`  
+**Endpoint:** `GET /api/profile`  
 ![Protected Profile](screenshots/18_protected_profile.png)
 
 #### 4. User Management (List Users)
-**Endpoint:** `GET http://localhost:3000/auth/users`  
+**Endpoint:** `GET /auth/users`  
 ![User Management](screenshots/19_auth_users_management.png)
 
 ---
 
 ### 8.6 Automated Verification Test Runner (27/27 Tests Passing)
-**Endpoint:** `GET http://localhost:3000/test/verify`  
+**Endpoint:** `node server.js` (Automated API Test Suite)  
 ![Automated Test Runner Output](screenshots/20_automated_verification_tests.png)
 
 ---
