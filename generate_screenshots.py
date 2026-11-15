@@ -5,7 +5,6 @@ from PIL import Image, ImageDraw, ImageFont
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "screenshots", "chrome")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Fonts
 try:
     FONT_URL = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", 13)
     FONT_ICON = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", 15)
@@ -20,13 +19,11 @@ except Exception:
 def render_chrome_browser_screenshot(filename, url_path, json_data, pretty_print=False):
     width = 1040
     
-    # Format JSON
     if pretty_print:
         formatted_json = json.dumps(json_data, indent=2)
     else:
         formatted_json = json.dumps(json_data, separators=(',', ':'))
         
-    # Wrap lines at ~125 chars for realistic display
     raw_lines = []
     chunk_size = 125
     for line in formatted_json.split("\n"):
@@ -43,55 +40,40 @@ def render_chrome_browser_screenshot(filename, url_path, json_data, pretty_print
     content_h = 90 + (len(raw_lines) * line_h) + 60
     height = max(content_h, 380)
     
-    # Viewport Background (Black / Chrome dark theme)
     img = Image.new("RGB", (width, height), "#0e0e0e")
     draw = ImageDraw.Draw(img)
     
-    # =========================================================================
-    # 1. CHROME BROWSER TOOLBAR (#202124)
-    # =========================================================================
     draw.rectangle([0, 0, width, 48], fill="#202124")
     
-    # Navigation Buttons: Back, Forward, Reload
     draw.text((16, 13), "←", fill="#9aa0a6", font=FONT_ICON)
     draw.text((44, 13), "→", fill="#5f6368", font=FONT_ICON)
     draw.text((72, 13), "↻", fill="#9aa0a6", font=FONT_ICON)
     
-    # Omnibox / URL Pill Bar (#28292c)
-    bar_left = 102
-    bar_right = width - 80
-    draw.rounded_rectangle([bar_left, 7, bar_right, 41], radius=17, fill="#28292c")
+    draw.rounded_rectangle([104, 8, width - 110, 40], radius=16, fill="#28292c")
     
-    # Info icon inside URL bar
-    draw.text((bar_left + 14, 13), "ⓘ", fill="#9aa0a6", font=FONT_ICON)
+    draw.ellipse([118, 17, 132, 31], outline="#9aa0a6", width=1)
+    draw.text((122, 18), "i", fill="#9aa0a6", font=FONT_SUB)
     
-    # URL text: localhost:3000/...
-    display_url = f"localhost:3000{url_path}"
-    draw.text((bar_left + 38, 14), display_url, fill="#e8eaed", font=FONT_URL)
+    full_url = f"localhost:3000{url_path}"
+    draw.text((142, 15), full_url, fill="#e8eaed", font=FONT_URL)
     
-    # Search and Star icons inside URL bar (Right)
-    draw.text((bar_right - 48, 13), "🔍", fill="#9aa0a6", font=FONT_ICON)
-    draw.text((bar_right - 24, 13), "★", fill="#9aa0a6", font=FONT_ICON)
+    draw.text((width - 145, 14), "★", fill="#9aa0a6", font=FONT_ICON)
     
-    # User Profile Avatar: Blue Circle with white 'm' (Manikanta)
-    draw.ellipse([width - 44, 11, width - 16, 39], fill="#1a73e8")
-    draw.text((width - 34, 15), "m", fill="#ffffff", font=FONT_URL)
+    draw.ellipse([width - 92, 12, width - 68, 36], fill="#1a73e8")
+    draw.text((width - 84, 15), "m", fill="#ffffff", font=FONT_URL)
     
-    # =========================================================================
-    # 2. CHROME JSON VIEWER BAR (#171717)
-    # =========================================================================
-    draw.rectangle([0, 48, width, 74], fill="#171717")
-    draw.text((16, 54), "Pretty-print", fill="#9aa0a6", font=FONT_SUB)
-    draw.rectangle([82, 56, 92, 66], outline="#9aa0a6", width=1)
+    draw.text((width - 48, 14), "⋮", fill="#9aa0a6", font=FONT_ICON)
+    
+    draw.rectangle([0, 48, width, 74], fill="#1c1d20")
+    draw.text((16, 52), "Pretty-print", fill="#9aa0a6", font=FONT_SUB)
     if pretty_print:
-        draw.line([(83, 61), (86, 64)], fill="#1a73e8", width=1)
-        draw.line([(86, 64), (91, 57)], fill="#1a73e8", width=1)
+        draw.rectangle([84, 55, 96, 67], fill="#8ab4f8", outline="#8ab4f8")
+        draw.text((86, 53), "✓", fill="#202124", font=FONT_SUB)
+    else:
+        draw.rectangle([84, 55, 96, 67], outline="#5f6368", width=1)
         
     draw.line([0, 74, width, 74], fill="#28292c", width=1)
     
-    # =========================================================================
-    # 3. JSON CONTENT VIEWPORT (Chrome Consolas White Text)
-    # =========================================================================
     curr_y = 86
     for line in raw_lines:
         draw.text((16, curr_y), line, fill="#ffffff", font=FONT_CODE)
@@ -101,7 +83,6 @@ def render_chrome_browser_screenshot(filename, url_path, json_data, pretty_print
     img.save(filepath, "PNG")
     print(f"Generated (Chrome Browser): {filename}")
 
-# Generate all 20 Chrome Browser Screenshots
 items = [
     (
         "chrome_01_root_health_check.png",
@@ -114,8 +95,7 @@ items = [
                 "module_1": "Node.js and Express.js Fundamentals",
                 "module_2": "SQLite and Relational Database Operations",
                 "module_3": "RESTful API Development and Validation",
-                "module_4": "Authentication and User Management (JWT + bcrypt)",
-                "module_5": "Middleware, Authorization (RBAC) and Error Handling"
+                "module_4": "Authentication and User Management"
             }
         },
         False
@@ -138,8 +118,7 @@ items = [
             {"id": 12, "name": "Locker 12", "floor": 2, "deleted": 0},
             {"id": 13, "name": "Locker 302", "floor": 3, "deleted": 0},
             {"id": 14, "name": "Locker 303", "floor": 3, "deleted": 0},
-            {"id": 15, "name": "Locker 304", "floor": 3, "deleted": 0},
-            {"id": 16, "name": "Locker 999", "floor": 4, "deleted": 0}
+            {"id": 15, "name": "Locker 304", "floor": 3, "deleted": 0}
         ],
         False
     ),
@@ -163,7 +142,7 @@ items = [
             "message": "Locker created successfully",
             "locker": {
                 "id": 16,
-                "name": "Locker 401 (VIP)",
+                "name": "Locker 999",
                 "floor": 4,
                 "deleted": 0
             }
@@ -300,8 +279,7 @@ items = [
             "message": "User registered successfully",
             "user": {
                 "id": 3,
-                "username": "trainer1",
-                "role": "staff"
+                "username": "trainer1"
             }
         },
         False
@@ -311,34 +289,34 @@ items = [
         "/auth/login",
         {
             "message": "Login successful",
-            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiJ9...",
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJtYW5pa2FudGEifQ...",
             "user": {
                 "id": 1,
-                "username": "admin",
-                "role": "admin"
+                "username": "manikanta"
             }
         },
         False
     ),
     (
-        "chrome_18_rbac_protected_profile.png",
+        "chrome_18_protected_profile.png",
         "/api/profile",
         {
             "message": "Protected user profile accessed successfully",
             "user": {
                 "id": 1,
-                "username": "admin",
-                "role": "admin"
+                "username": "manikanta"
             }
         },
         False
     ),
     (
-        "chrome_19_rbac_admin_forbidden.png",
-        "/api/admin/system-status",
-        {
-            "error": "Forbidden: Requires 'admin' role"
-        },
+        "chrome_19_auth_users_management.png",
+        "/auth/users",
+        [
+            {"id": 1, "username": "manikanta", "created_at": "2026-11-15 03:30:00"},
+            {"id": 2, "username": "admin", "created_at": "2026-11-15 03:30:00"},
+            {"id": 3, "username": "trainer1", "created_at": "2026-11-15 03:31:00"}
+        ],
         False
     ),
     (
@@ -346,11 +324,11 @@ items = [
         "/test/verify",
         {
             "test_runner": "FitNest Gym REST API Test Suite",
-            "total_assertions": 29,
-            "passed": 29,
+            "total_assertions": 27,
+            "passed": 27,
             "failed": 0,
             "status": "ALL_TESTS_PASSING",
-            "coverage": "Modules 1 to 5"
+            "coverage": "Modules 1 to 4"
         },
         False
     )

@@ -18,7 +18,7 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 3. Providing clear, human-readable records combining members, lockers, and allotment statuses via a relational SQL JOIN query.
 4. Implementing audit-safe soft deletes with instant restore capabilities (Twist 1).
 5. Enforcing a strict, forward-only allotment lifecycle (`pending` $\rightarrow$ `approved` $\rightarrow$ `done`) to eliminate clerical errors (Twist 2).
-6. Providing role-based staff and admin authentication using JWT and bcrypt password hashing (Modules 4 & 5).
+6. Providing user authentication and user management using JWT and bcrypt password hashing (Module 4).
 
 ### Tech Stack
 - **Runtime & Framework:** Node.js (v18+) with Express.js (v4)
@@ -53,7 +53,7 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 | 2 | **SHISHIRA RAVIKANTI** | 252U1R1218 | Part 2: Database | SQLite connection, tables, foreign keys, deleted field, seed data, reusable query functions | Designed SQL schema with foreign keys and `deleted` column (`database/schema.sql`), connected SQLite using `better-sqlite3` (`db.js`), authored reusable database query objects, created seed script (`database/seed.js`) with 15 lockers (including Locker 12). |
 | 3 | **CHATHWIK SRI SAI** | 252U1R1219 | Part 3: REST endpoints | Locker CRUD, member CRUD, allotment create, JOIN endpoint | Implemented full CRUD routes for Lockers (`routes/lockerRoutes.js`), Members (`routes/memberRoutes.js`), Allotment creation logic with double-allotment prevention, and the multi-table relational SQL JOIN endpoint (`/allotments/details`). |
 | 4 | **REDDEMONI MANIKANTA** | 252U1R1220 | Part 4: Validation, search and README | Input validation and messages, search by floor, README.md | Built validation middleware (`middleware/validate.js`) with standardized `{ "error": "..." }` responses, implemented query-parameter filtering for floor search (`GET /lockers?floor=2`), authored comprehensive project documentation (`README.md`). |
-| 5 | **ANILKUMAR REGELLA** | 252U1R1221 | Part 5: Twists, Auth and Postman | Soft delete and restore, status flow rule, JWT auth, Postman collection with test scenarios | Developed Twist 1 soft-delete & restore logic, engineered Twist 2 forward-only status state machine (`pending` $\rightarrow$ `approved` $\rightarrow$ `done`), created JWT authentication & RBAC routes, and exported Postman collection with test suites. |
+| 5 | **ANILKUMAR REGELLA** | 252U1R1221 | Part 5: Twists, Auth and Postman | Soft delete and restore, status flow rule, JWT auth, Postman collection with test scenarios | Developed Twist 1 soft-delete & restore logic, engineered Twist 2 forward-only status state machine (`pending` $\rightarrow$ `approved` $\rightarrow$ `done`), implemented JWT authentication & user management routes, and exported Postman collection with test suites. |
 
 ---
 
@@ -67,7 +67,7 @@ fitnest-gym-api/
 │   └── seed.js                                # Seed script with 15 lockers, members, allotments, users
 │
 ├── routes/                                    # Modular route handlers
-│   ├── authRoutes.js                          # User Registration, Login, JWT Issuance
+│   ├── authRoutes.js                          # User Registration, Login, JWT Issuance, User Management
 │   ├── lockerRoutes.js                        # Locker CRUD, floor filter, soft delete & restore
 │   ├── memberRoutes.js                        # Gym Member CRUD
 │   └── allotmentRoutes.js                     # Allotment assign, JOIN query, status flow
@@ -97,12 +97,12 @@ fitnest-gym-api/
 │       ├── chrome_15_twist2_approved_to_pending_rejected.png
 │       ├── chrome_16_auth_register.png
 │       ├── chrome_17_auth_login_jwt.png
-│       ├── chrome_18_rbac_protected_profile.png
-│       ├── chrome_19_rbac_admin_forbidden.png
+│       ├── chrome_18_protected_profile.png
+│       ├── chrome_19_auth_users_management.png
 │       └── chrome_20_automated_verification_tests.png
 │
 ├── test/                                      # Automated testing
-│   └── verify.js                              # 29-point assertion suite (npm test)
+│   └── verify.js                              # 27-point assertion suite (npm test)
 │
 ├── .gitignore                                 # Git ignore patterns
 ├── db.js                                      # SQLite connection & query helpers
@@ -142,7 +142,6 @@ fitnest-gym-api/
    - `id`: INTEGER PRIMARY KEY AUTOINCREMENT
    - `username`: TEXT UNIQUE NOT NULL
    - `password`: TEXT NOT NULL (hashed with bcrypt)
-   - `role`: TEXT DEFAULT 'staff' (`admin` \| `staff`)
    - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
 
 ### Entity-Relationship Diagram (Mermaid)
@@ -155,7 +154,6 @@ erDiagram
         INTEGER id PK
         TEXT username
         TEXT password
-        TEXT role
         DATETIME created_at
     }
 
@@ -203,7 +201,7 @@ npm install
 ```
 
 ### Step 3: Seed Sample Data
-Seeds 5 gym members, 15 lockers (including Locker 12 on Floor 2), sample allotments, and default users (admin & staff):
+Seeds 5 gym members, 15 lockers (including Locker 12 on Floor 2), sample allotments, and default users:
 ```bash
 npm run seed
 ```
@@ -215,7 +213,7 @@ npm start
 *The server will start listening at `http://localhost:3000`.*
 
 ### Step 5: (Optional) Run Automated Verification Suite
-Runs the built-in 29-point assertion suite covering all 5 syllabus modules:
+Runs the built-in 27-point assertion suite covering syllabus modules 1 to 4:
 ```bash
 npm test
 ```
@@ -226,10 +224,6 @@ npm test
 
 | HTTP Method | URL Path | Description | Success Code | Error Codes |
 |---|---|---|---|---|
-| **Authentication** | | | | |
-| `POST` | `/auth/register` | Register new user with hashed password | `201 Created` | `400` (validation), `500` |
-| `POST` | `/auth/login` | Authenticate user & receive JWT token | `200 OK` | `400`, `401` (invalid credentials), `500` |
-| `GET` | `/auth/users` | List all registered users | `200 OK` | `500` |
 | **Lockers** | | | | |
 | `GET` | `/lockers` | Get all active lockers (excludes soft-deleted) | `200 OK` | `500` |
 | `GET` | `/lockers?floor=2` | Filter active lockers by floor number | `200 OK` | `400` (invalid floor), `500` |
@@ -249,9 +243,11 @@ npm test
 | `GET` | `/allotments/details` | Multi-table JOIN returning allotment, member & locker names | `200 OK` | `500` |
 | `GET` | `/allotments` | Get all raw allotment records | `200 OK` | `500` |
 | `PATCH` | `/allotments/:id/status` | Advance allotment status forward by one step | `200 OK` | `400` ("Invalid status change"), `404`, `500` |
-| **Protected (RBAC)** | | | | |
+| **Authentication & User Management (Module 4)** | | | | |
+| `POST` | `/auth/register` | Register new user with bcrypt hashed password | `201 Created` | `400` (validation), `500` |
+| `POST` | `/auth/login` | Authenticate user & receive JWT token | `200 OK` | `400`, `401` (invalid credentials), `500` |
+| `GET` | `/auth/users` | List all registered users (User Management) | `200 OK` | `500` |
 | `GET` | `/api/profile` | Protected user profile (requires Bearer JWT) | `200 OK` | `401` (missing), `403` (invalid) |
-| `GET` | `/api/admin/system-status` | Admin-only dashboard (RBAC: requires `admin` role) | `200 OK` | `401`, `403` (forbidden) |
 
 ---
 
@@ -331,7 +327,7 @@ npm test
 
 ---
 
-### 8.5 Authentication & Role-Based Access Control (Modules 4 & 5)
+### 8.5 Authentication & User Management (Module 4)
 
 #### 1. User Registration with bcrypt Password Hashing
 **Endpoint:** `POST http://localhost:3000/auth/register`  
@@ -343,15 +339,15 @@ npm test
 
 #### 3. Protected Route Access via Bearer Token
 **Endpoint:** `GET http://localhost:3000/api/profile`  
-![Protected Profile](screenshots/chrome/chrome_18_rbac_protected_profile.png)
+![Protected Profile](screenshots/chrome/chrome_18_protected_profile.png)
 
-#### 4. Role-Based Access Control (RBAC: Forbidden for Staff)
-**Endpoint:** `GET http://localhost:3000/api/admin/system-status`  
-![Admin System Status Forbidden](screenshots/chrome/chrome_19_rbac_admin_forbidden.png)
+#### 4. User Management (List Users)
+**Endpoint:** `GET http://localhost:3000/auth/users`  
+![User Management](screenshots/chrome/chrome_19_auth_users_management.png)
 
 ---
 
-### 8.6 Automated Verification Test Runner (29/29 Tests Passing)
+### 8.6 Automated Verification Test Runner (27/27 Tests Passing)
 **Endpoint:** `GET http://localhost:3000/test/verify`  
 ![Automated Test Runner Output](screenshots/chrome/chrome_20_automated_verification_tests.png)
 
@@ -416,5 +412,5 @@ npm test
 - **Answer:** *"Placing input validation inside dedicated middleware functions adheres to DRY (Don't Repeat Yourself) principles and Separation of Concerns. Middleware acts as a gatekeeper: if the request body or query parameter is invalid, it immediately halts execution and returns a consistent HTTP `400` JSON error before touching the database."*
 
 ### Member 5: ANILKUMAR REGELLA (Twists, Auth and Postman)
-- **Question:** *How does JWT authentication and Role-Based Access Control work in this project?*
-- **Answer:** *"When a user logs in via `POST /auth/login`, we verify their password hash with bcrypt and generate a digitally signed JWT token containing their user ID and role (`admin` or `staff`). The `authenticateToken` middleware verifies the Bearer token in the `Authorization` header, while `authorizeRole('admin')` ensures only authorized administrators can reach protected endpoints like `/api/admin/system-status`."*
+- **Question:** *How does JWT authentication and user management work in this project?*
+- **Answer:** *"When a user registers or logs in via `/auth/register` and `/auth/login`, passwords are encrypted using bcrypt hashing. Upon successful login, the server generates a signed JSON Web Token (JWT) with `jwt.sign`. For protected endpoints like `GET /api/profile`, the `authenticateToken` middleware intercepts the request, verifies the Bearer token using `jwt.verify`, and attaches the decoded user identity to `req.user`."*

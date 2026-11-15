@@ -1,6 +1,5 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 
 const JWT_SECRET = process.env.JWT_SECRET || "fitnest_gym_secret_jwt_key_2026";
 
@@ -42,15 +41,6 @@ function authenticateToken(req, res, next) {
     });
 }
 
-function authorizeRole(requiredRole) {
-    return (req, res, next) => {
-        if (!req.user || req.user.role !== requiredRole) {
-            return res.status(403).json({ error: `Forbidden: Requires '${requiredRole}' role` });
-        }
-        next();
-    };
-}
-
 app.use("/auth", authRoutes);
 app.use("/lockers", lockerRoutes);
 app.use("/members", memberRoutes);
@@ -63,16 +53,6 @@ app.get("/api/profile", authenticateToken, (req, res) => {
     });
 });
 
-app.get("/api/admin/system-status", authenticateToken, authorizeRole("admin"), (req, res) => {
-    res.status(200).json({
-        message: "Admin system status accessed successfully",
-        serverStatus: "Operational",
-        database: "SQLite3 (better-sqlite3)",
-        authenticatedAdmin: req.user.username,
-        timestamp: new Date().toISOString()
-    });
-});
-
 app.get("/", (req, res) => {
     res.status(200).json({
         message: "Welcome to FitNest Gym Locker Room Management REST API",
@@ -82,8 +62,7 @@ app.get("/", (req, res) => {
             module_1: "Node.js and Express.js Fundamentals",
             module_2: "SQLite and Relational Database Operations",
             module_3: "RESTful API Development and Validation",
-            module_4: "Authentication and User Management (JWT + bcrypt)",
-            module_5: "Middleware, Authorization (RBAC) and Error Handling"
+            module_4: "Authentication and User Management"
         },
         endpoints: {
             auth: {
@@ -113,8 +92,7 @@ app.get("/", (req, res) => {
                 status_flow: "PATCH /allotments/:id/status"
             },
             protected_routes: {
-                profile: "GET /api/profile (Requires JWT Bearer Token)",
-                admin_status: "GET /api/admin/system-status (Requires Admin JWT Token)"
+                profile: "GET /api/profile (Requires JWT Bearer Token)"
             }
         }
     });
@@ -125,8 +103,6 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-    console.error("⚠️ [Global Error Handler]:", err.message);
-
     if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
         return res.status(400).json({ error: "Malformed JSON payload" });
     }
@@ -138,11 +114,9 @@ app.use((err, req, res, next) => {
 
 if (require.main === module) {
     app.listen(PORT, () => {
-        console.log(`====================================================`);
-        console.log(`🏋️  FitNest Gym API Server running at http://localhost:${PORT}`);
-        console.log(`👥 Group ID: YG-CSE2E-G01 | Theme 1: Locker Rooms`);
-        console.log(`📘 Syllabus Modules 1 - 5 Active & Ready!`);
-        console.log(`====================================================`);
+        console.log(`FitNest Gym API Server running at http://localhost:${PORT}`);
+        console.log(`Group ID: YG-CSE2E-G01 | Theme 1: Locker Rooms`);
+        console.log(`Syllabus Modules 1 - 4 Active`);
     });
 }
 

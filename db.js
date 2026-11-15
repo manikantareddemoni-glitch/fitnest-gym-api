@@ -1,105 +1,80 @@
-// Owner: Member 2 - Database (SHISHIRA RAVIKANTI, 252U1R1218)
-// SQLite database connection and reusable database helper queries
-// Maps directly to Module 2 (SQLite & Relational Operations) & Module 4 (User Management)
+const Database = require("better-sqlite3");
+const path = require("path");
+const fs = require("fs");
 
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
-
-// Path to SQLite database file inside database/ directory
-const dbPath = path.join(__dirname, 'database', 'fitnest.db');
+const dbPath = path.join(__dirname, "database", "fitnest.db");
 const db = new Database(dbPath);
 
-// Crucial: SQLite has foreign keys turned OFF by default.
-// Explicitly turn foreign keys ON to enforce relational integrity (Module 2: Constraints).
-db.pragma('foreign_keys = ON');
+db.pragma("foreign_keys = ON");
 
-/**
- * Module 2: Initialize schema if tables do not exist yet
- */
 function initializeDatabase() {
-    const schemaPath = path.join(__dirname, 'database', 'schema.sql');
+    const schemaPath = path.join(__dirname, "database", "schema.sql");
     if (fs.existsSync(schemaPath)) {
-        const schema = fs.readFileSync(schemaPath, 'utf-8');
+        const schema = fs.readFileSync(schemaPath, "utf-8");
         db.exec(schema);
     }
 }
 
-// Auto-run schema initialization
 initializeDatabase();
 
-/**
- * Reusable Query Functions for Lockers (Module 2: Parameterized Queries & CRUD)
- */
 const lockerQueries = {
-    // Get all lockers that are NOT soft-deleted (deleted = 0)
-    // Optional floor filter supported
     getAll: (floor) => {
         if (floor !== undefined && floor !== null) {
-            const stmt = db.prepare('SELECT * FROM lockers WHERE deleted = 0 AND floor = ? ORDER BY id ASC');
+            const stmt = db.prepare("SELECT * FROM lockers WHERE deleted = 0 AND floor = ? ORDER BY id ASC");
             return stmt.all(floor);
         }
-        const stmt = db.prepare('SELECT * FROM lockers WHERE deleted = 0 ORDER BY id ASC');
+        const stmt = db.prepare("SELECT * FROM lockers WHERE deleted = 0 ORDER BY id ASC");
         return stmt.all();
     },
 
-    // Get a single locker by ID ONLY IF it is not deleted
     getById: (id) => {
-        const stmt = db.prepare('SELECT * FROM lockers WHERE id = ? AND deleted = 0');
+        const stmt = db.prepare("SELECT * FROM lockers WHERE id = ? AND deleted = 0");
         return stmt.get(id);
     },
 
-    // Get a locker by ID regardless of deleted status (used during restore check)
     getRawById: (id) => {
-        const stmt = db.prepare('SELECT * FROM lockers WHERE id = ?');
+        const stmt = db.prepare("SELECT * FROM lockers WHERE id = ?");
         return stmt.get(id);
     },
 
-    // Insert a new locker
     create: (name, floor) => {
-        const stmt = db.prepare('INSERT INTO lockers (name, floor, deleted) VALUES (?, ?, 0)');
+        const stmt = db.prepare("INSERT INTO lockers (name, floor, deleted) VALUES (?, ?, 0)");
         const result = stmt.run(name, floor);
         return { id: result.lastInsertRowid, name, floor, deleted: 0 };
     },
 
-    // Update locker details (only if active / not soft-deleted)
     update: (id, name, floor) => {
-        const stmt = db.prepare('UPDATE lockers SET name = ?, floor = ? WHERE id = ? AND deleted = 0');
+        const stmt = db.prepare("UPDATE lockers SET name = ?, floor = ? WHERE id = ? AND deleted = 0");
         const result = stmt.run(name, floor, id);
         return result.changes > 0;
     },
 
-    // Twist 1: Soft delete a locker by setting deleted = 1
     softDelete: (id) => {
-        const stmt = db.prepare('UPDATE lockers SET deleted = 1 WHERE id = ? AND deleted = 0');
+        const stmt = db.prepare("UPDATE lockers SET deleted = 1 WHERE id = ? AND deleted = 0");
         const result = stmt.run(id);
         return result.changes > 0;
     },
 
-    // Twist 1: Restore a soft-deleted locker by setting deleted = 0
     restore: (id) => {
-        const stmt = db.prepare('UPDATE lockers SET deleted = 0 WHERE id = ?');
+        const stmt = db.prepare("UPDATE lockers SET deleted = 0 WHERE id = ?");
         const result = stmt.run(id);
         return result.changes > 0;
     }
 };
 
-/**
- * Reusable Query Functions for Members (Module 2: CRUD Operations)
- */
 const memberQueries = {
     getAll: () => {
-        const stmt = db.prepare('SELECT * FROM members ORDER BY id ASC');
+        const stmt = db.prepare("SELECT * FROM members ORDER BY id ASC");
         return stmt.all();
     },
 
     getById: (id) => {
-        const stmt = db.prepare('SELECT * FROM members WHERE id = ?');
+        const stmt = db.prepare("SELECT * FROM members WHERE id = ?");
         return stmt.get(id);
     },
 
     create: (name, phone, email) => {
-        const stmt = db.prepare('INSERT INTO members (name, phone, email) VALUES (?, ?, ?)');
+        const stmt = db.prepare("INSERT INTO members (name, phone, email) VALUES (?, ?, ?)");
         const result = stmt.run(name, phone || null, email || null);
         return {
             id: result.lastInsertRowid,
@@ -110,29 +85,26 @@ const memberQueries = {
     },
 
     update: (id, name, phone, email) => {
-        const stmt = db.prepare('UPDATE members SET name = ?, phone = ?, email = ? WHERE id = ?');
+        const stmt = db.prepare("UPDATE members SET name = ?, phone = ?, email = ? WHERE id = ?");
         const result = stmt.run(name, phone || null, email || null, id);
         return result.changes > 0;
     },
 
     delete: (id) => {
-        const stmt = db.prepare('DELETE FROM members WHERE id = ?');
+        const stmt = db.prepare("DELETE FROM members WHERE id = ?");
         const result = stmt.run(id);
         return result.changes > 0;
     }
 };
 
-/**
- * Reusable Query Functions for Allotments (Module 2: Relational Foreign Keys & Joins)
- */
 const allotmentQueries = {
     getAll: () => {
-        const stmt = db.prepare('SELECT * FROM allotments ORDER BY id ASC');
+        const stmt = db.prepare("SELECT * FROM allotments ORDER BY id ASC");
         return stmt.all();
     },
 
     getById: (id) => {
-        const stmt = db.prepare('SELECT * FROM allotments WHERE id = ?');
+        const stmt = db.prepare("SELECT * FROM allotments WHERE id = ?");
         return stmt.get(id);
     },
 
@@ -154,11 +126,10 @@ const allotmentQueries = {
             id: result.lastInsertRowid,
             member_id: memberId,
             locker_id: lockerId,
-            status: 'pending'
+            status: "pending"
         };
     },
 
-    // Relational SQL JOIN query: joins allotments, members, and lockers tables
     getDetails: () => {
         const stmt = db.prepare(
             `SELECT 
@@ -176,38 +147,34 @@ const allotmentQueries = {
     },
 
     updateStatus: (id, newStatus) => {
-        const stmt = db.prepare('UPDATE allotments SET status = ? WHERE id = ?');
+        const stmt = db.prepare("UPDATE allotments SET status = ? WHERE id = ?");
         const result = stmt.run(newStatus, id);
         return result.changes > 0;
     }
 };
 
-/**
- * Module 4: Reusable Query Functions for Users (Authentication & User Management)
- */
 const userQueries = {
     getByUsername: (username) => {
-        const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
+        const stmt = db.prepare("SELECT * FROM users WHERE username = ?");
         return stmt.get(username);
     },
 
     getById: (id) => {
-        const stmt = db.prepare('SELECT id, username, role, created_at FROM users WHERE id = ?');
+        const stmt = db.prepare("SELECT id, username, created_at FROM users WHERE id = ?");
         return stmt.get(id);
     },
 
-    create: (username, hashedPassword, role = 'staff') => {
-        const stmt = db.prepare('INSERT INTO users (username, password, role) VALUES (?, ?, ?)');
-        const result = stmt.run(username, hashedPassword, role);
+    create: (username, hashedPassword) => {
+        const stmt = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+        const result = stmt.run(username, hashedPassword);
         return {
             id: result.lastInsertRowid,
-            username,
-            role
+            username
         };
     },
 
     getAll: () => {
-        const stmt = db.prepare('SELECT id, username, role, created_at FROM users ORDER BY id ASC');
+        const stmt = db.prepare("SELECT id, username, created_at FROM users ORDER BY id ASC");
         return stmt.all();
     }
 };

@@ -1,55 +1,36 @@
-// Owner: Member 4 - Validation & Search (REDDEMONI MANIKANTA, 252U1R1220)
-// Express middleware functions for validating request body and query parameters.
-// Ensures consistent JSON error messages with status code 400.
-
-/**
- * Validates locker creation and update payloads:
- * - Locker name: required, non-empty string
- * - Floor: required, non-negative integer (>= 0)
- */
 function validateLocker(req, res, next) {
     const { name, floor } = req.body;
 
-    if (!name || typeof name !== 'string' || name.trim() === '') {
-        return res.status(400).json({ error: 'Locker name is required' });
+    if (!name || typeof name !== "string" || name.trim() === "") {
+        return res.status(400).json({ error: "Locker name is required" });
     }
 
     if (
         floor === undefined ||
         floor === null ||
-        floor === '' ||
+        floor === "" ||
         !Number.isInteger(Number(floor)) ||
         Number(floor) < 0
     ) {
-        return res.status(400).json({ error: 'Floor must be a non-negative integer' });
+        return res.status(400).json({ error: "Floor must be a non-negative integer" });
     }
 
-    // Sanitize values for downstream controllers
     req.body.name = name.trim();
     req.body.floor = Number(floor);
     next();
 }
 
-/**
- * Validates member creation and update payloads:
- * - Member name: required, non-empty string
- */
 function validateMember(req, res, next) {
     const { name } = req.body;
 
-    if (!name || typeof name !== 'string' || name.trim() === '') {
-        return res.status(400).json({ error: 'Member name is required' });
+    if (!name || typeof name !== "string" || name.trim() === "") {
+        return res.status(400).json({ error: "Member name is required" });
     }
 
     req.body.name = name.trim();
     next();
 }
 
-/**
- * Validates allotment creation payloads:
- * - member_id: required integer
- * - locker_id: required integer
- */
 function validateAllotment(req, res, next) {
     const { member_id, locker_id } = req.body;
 
@@ -61,7 +42,7 @@ function validateAllotment(req, res, next) {
         !Number.isInteger(Number(member_id)) ||
         !Number.isInteger(Number(locker_id))
     ) {
-        return res.status(400).json({ error: 'member_id and locker_id are required' });
+        return res.status(400).json({ error: "member_id and locker_id are required" });
     }
 
     req.body.member_id = Number(member_id);
@@ -69,15 +50,12 @@ function validateAllotment(req, res, next) {
     next();
 }
 
-/**
- * Validates the optional ?floor= query parameter in GET /lockers
- */
 function validateFloorQuery(req, res, next) {
     const { floor } = req.query;
 
     if (floor !== undefined) {
         if (!Number.isInteger(Number(floor)) || Number(floor) < 0) {
-            return res.status(400).json({ error: 'Floor must be a non-negative integer' });
+            return res.status(400).json({ error: "Floor must be a non-negative integer" });
         }
         req.query.floor = Number(floor);
     }
