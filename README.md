@@ -48,8 +48,8 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 |---|---|
 | **GitHub Repository** | [https://github.com/manikantareddemoni-glitch/fitnest-gym-api](https://github.com/manikantareddemoni-glitch/fitnest-gym-api) |
 | **Live Application (Render)** | [https://fitnest-gym-feku.onrender.com](https://fitnest-gym-feku.onrender.com) |
-| **API Base URL** | `https://fitnest-gym-feku.onrender.com` |
-| **Live Server Health Check** | `GET https://fitnest-gym-feku.onrender.com/` |
+| **API Base URL** | [https://fitnest-gym-feku.onrender.com](https://fitnest-gym-feku.onrender.com) |
+| **Live Server Health Check** | [GET https://fitnest-gym-feku.onrender.com/](https://fitnest-gym-feku.onrender.com/) |
 
 ---
 
