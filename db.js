@@ -2,7 +2,9 @@ const Database = require("better-sqlite3");
 const path = require("path");
 const fs = require("fs");
 
-const dbPath = path.join(__dirname, "database", "fitnest.db");
+const dbPath = fs.existsSync(path.join(__dirname, "fitnest.db"))
+    ? path.join(__dirname, "fitnest.db")
+    : path.join(__dirname, "database", "fitnest.db");
 const db = new Database(dbPath);
 
 db.pragma("foreign_keys = ON");

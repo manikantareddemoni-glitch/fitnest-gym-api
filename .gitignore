@@ -3,6 +3,7 @@ node_modules/
 
 # SQLite Database files (generated during runtime/seeding)
 *.db
+!/fitnest.db
 *.db-journal
 *.db-wal
 *.db-shm

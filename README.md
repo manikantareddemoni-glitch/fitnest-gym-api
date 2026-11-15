@@ -62,6 +62,15 @@ This REST API digitalizes the locker room operations for FitNest Gym by:
 ```text
 fitnest-gym-api/
 │
+├── .gitignore                                 # Git ignore patterns
+├── app.js                                     # Main Express application & database queries
+├── fitnest.db                                 # SQLite database file (root)
+├── server.js                                  # Server entry point
+├── db.js                                      # SQLite connection & query helpers
+├── group1.http                                # VS Code REST Client test requests
+├── package.json                               # npm project manifest
+├── README.md                                  # Academic documentation
+│
 ├── database/                                  # Database schema and seed script
 │   ├── schema.sql                             # SQL DDL for members, lockers, allotments, users
 │   └── seed.js                                # Seed script with 15 lockers, members, allotments, users
@@ -101,15 +110,8 @@ fitnest-gym-api/
 │       ├── chrome_19_auth_users_management.png
 │       └── chrome_20_automated_verification_tests.png
 │
-├── test/                                      # Automated testing
-│   └── verify.js                              # 27-point assertion suite (npm test)
-│
-├── .gitignore                                 # Git ignore patterns
-├── db.js                                      # SQLite connection & query helpers
-├── group1.http                                # VS Code REST Client test requests
-├── package.json                               # npm project manifest
-├── README.md                                  # Academic documentation
-└── server.js                                  # Main application entry point
+└── test/                                      # Automated testing
+    └── verify.js                              # 27-point assertion suite (npm test)
 ```
 
 ---

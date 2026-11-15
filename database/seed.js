@@ -81,4 +81,7 @@ insertUser.run("manikanta", password123Hash);
 insertUser.run("admin", admin123Hash);
 console.log("Seeded default users with bcrypt hashed passwords.");
 
+const rootDbPath = path.join(__dirname, "..", "fitnest.db");
+fs.copyFileSync(dbPath, rootDbPath);
+
 console.log("Database seeding completed successfully.\n");

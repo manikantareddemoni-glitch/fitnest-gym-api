@@ -2,10 +2,10 @@
   "name": "fitnest-gym-api",
   "version": "1.0.0",
   "description": "FitNest Gym - Locker Room Management REST API (Group ID: YG-CSE2E-G01)",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
+    "start": "node app.js",
+    "dev": "node --watch app.js",
     "seed": "node database/seed.js",
     "test": "node test/verify.js"
   },
